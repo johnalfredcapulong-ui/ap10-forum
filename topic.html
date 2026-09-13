@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Topic — AP10 Localized Learning</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <a href="index.html" class="back-link">← Back to Topics</a>
+    <h1 id="topic-title">Loading...</h1>
+    <p id="topic-description"></p>
+  </header>
+
+  <main>
+    <section class="section">
+      <h2>Local Materials</h2>
+      <div id="materials" class="materials-grid">
+        <p class="loading">Loading...</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Documentaries</h2>
+      <div id="videos" class="videos-grid">
+        <p class="loading">Loading...</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Forum &amp; Reflections</h2>
+
+      <div class="post-form-card">
+        <h3>Post a Question or Reflection</h3>
+        <form id="post-form">
+          <div class="post-form-row">
+            <input type="text" id="post-name" placeholder="Your name" required maxlength="50" />
+            <select id="post-type">
+              <option value="discussion">Question / Discussion</option>
+              <option value="reflection">Reflection</option>
+            </select>
+          </div>
+          <textarea id="post-content" placeholder="Share your question, idea, or reflection..." required maxlength="1000"></textarea>
+          <div class="post-form-footer">
+            <span class="post-form-hint">Be respectful to your classmates.</span>
+            <button type="submit" class="btn">Post</button>
+          </div>
+          <p class="form-msg" id="post-msg"></p>
+        </form>
+      </div>
+
+      <div id="posts">
+        <p class="loading">Loading...</p>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="js/topic.js"></script>
+</body>
+</html>
