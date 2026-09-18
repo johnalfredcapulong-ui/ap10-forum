@@ -1,5 +1,6 @@
 import { supabase } from './supabase.js';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
+import { getUser } from './auth.js';
 
 const params = new URLSearchParams(window.location.search);
 const slug = params.get('slug');
@@ -10,10 +11,14 @@ const materialsEl = document.getElementById('materials');
 const videosEl = document.getElementById('videos');
 const postsEl = document.getElementById('posts');
 
+
+
 let topic = null;
+let currentUser = null;
 
 // ---------- Load topic ----------
 async function loadTopic() {
+   currentUser = await getUser();
   if (!slug) {
     titleEl.textContent = 'No topic found';
     return;
@@ -215,7 +220,7 @@ async function loadPosts() {
       .map((r) => `
         <div class="reply">
           <div class="reply-header">
-            <strong>${escapeHtml(r.name || 'Anonymous')}</strong>
+            <strong>${escapeHtml(p.name || 'Anonymous')}</strong>
             <span class="badge">${r.type === 'reflection' ? 'Reflection' : 'Reply'}</span>
           </div>
           <p>${escapeHtml(r.content)}</p>
@@ -235,7 +240,7 @@ async function loadPosts() {
         <button class="reply-toggle" data-parent="${p.id}">Reply</button>
 
         <div class="reply-form-wrap" data-form-for="${p.id}" style="display:none;">
-          <input type="text" class="reply-name" placeholder="Your name" maxlength="50" />
+          
           <textarea class="reply-content" placeholder="Write your reply..." maxlength="1000"></textarea>
           <div class="reply-actions">
             <button class="btn-secondary reply-cancel">Cancel</button>
@@ -270,9 +275,18 @@ function attachPostHandlers() {
     btn.addEventListener('click', async () => {
       if (!topic) return;
 
-      const wrap = postsEl.querySelector(`[data-form-for="${btn.dataset.parent}"]`);
-      const name = wrap.querySelector('.reply-name').value.trim();
-      const content = wrap.querySelector('.reply-content').value.trim();
+       if (!currentUser) {
+          alert('Please log in first.');
+          return;
+        }
+
+        const wrap = postsEl.querySelector(`[data-form-for="${btn.dataset.parent}"]`);
+        const content = wrap.querySelector('.reply-content').value.trim();
+
+        if (!content) {
+          alert('Reply is required.');
+          return;
+        }
 
       if (!name || !content) {
         alert('Name and reply are required.');
@@ -285,7 +299,8 @@ function attachPostHandlers() {
       const { error } = await supabase.from('posts').insert({
         topic_id: topic.id,
         parent_id: btn.dataset.parent,
-        name,
+        user_id: currentUser.id,
+        name: currentUser.user_metadata.name || 'Anonymous',
         content,
         type: 'discussion',
       });
@@ -329,23 +344,29 @@ if (postForm) {
     postMsg.textContent = 'Posting...';
     postMsg.className = 'form-msg';
 
-    const name = document.getElementById('post-name').value.trim();
-    const content = document.getElementById('post-content').value.trim();
-    const type = document.getElementById('post-type').value;
+    if (!currentUser) {
+        postMsg.textContent = 'Please log in first.';
+        postMsg.className = 'form-msg error';
+        return;
+      }
 
-    if (!name || !content) {
-      postMsg.textContent = 'Name and content are required.';
-      postMsg.className = 'form-msg error';
-      return;
-    }
+      const content = document.getElementById('post-content').value.trim();
+      const type = document.getElementById('post-type').value;
 
-    const { error } = await supabase.from('posts').insert({
-      topic_id: topic.id,
-      name,
-      content,
-      type,
-      parent_id: null,
-    });
+      if (!content) {
+        postMsg.textContent = 'Content is required.';
+        postMsg.className = 'form-msg error';
+        return;
+      }
+
+      const { error } = await supabase.from('posts').insert({
+        topic_id: topic.id,
+        user_id: currentUser.id,
+        name: currentUser.user_metadata.name || 'Anonymous',
+        content,
+        type,
+        parent_id: null,
+      });
 
     if (error) {
       postMsg.textContent = `Error: ${error.message}`;

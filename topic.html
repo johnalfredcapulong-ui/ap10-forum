@@ -7,6 +7,11 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <nav class="user-nav">
+    <a href="index.html" class="nav-home-link">Home</a>
+    <span class="user-name" id="nav-name">Loading...</span>
+    <button class="logout-btn" id="logout-btn">Log Out</button>
+  </nav>
   <header>
     <a href="index.html" class="back-link">← Back to Topics</a>
     <h1 id="topic-title">Loading...</h1>
@@ -35,7 +40,6 @@
         <h3>Post a Question or Reflection</h3>
         <form id="post-form">
           <div class="post-form-row">
-            <input type="text" id="post-name" placeholder="Your name" required maxlength="50" />
             <select id="post-type">
               <option value="discussion">Question / Discussion</option>
               <option value="reflection">Reflection</option>
@@ -57,5 +61,13 @@
   </main>
 
   <script type="module" src="js/topic.js"></script>
+  <script type="module">
+    import { requireAuth, signOut } from './js/auth.js';
+    const user = await requireAuth();
+    if (user) {
+      document.getElementById('nav-name').textContent = user.user_metadata.name || 'Student';
+    }
+    document.getElementById('logout-btn').addEventListener('click', signOut);
+  </script>
 </body>
 </html>
