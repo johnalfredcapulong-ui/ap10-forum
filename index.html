@@ -7,6 +7,11 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+
+  <nav class="user-nav" id="user-nav">
+    <span class="user-name" id="nav-name">Loading...</span>
+    <button class="logout-btn" id="logout-btn">Log Out</button>
+  </nav>
   <header>
     <div class="header-top">
       <h1>AP10 Localized Learning</h1>
@@ -26,5 +31,15 @@
   </main>
 
   <script type="module" src="js/main.js"></script>
+  <script type="module">
+    import { requireAuth, signOut } from './js/auth.js';
+
+    const user = await requireAuth();
+    if (user) {
+      document.getElementById('nav-name').textContent = `Hi, ${user.user_metadata.name || 'Student'}`;
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', signOut);
+  </script> 
 </body>
 </html>
