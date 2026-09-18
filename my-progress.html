@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Progress — DocuLearn</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar"></aside>
+
+    <div class="dashboard-main">
+      <div class="topbar"></div>
+
+      <div class="dashboard-content">
+        <h1 class="page-title">My Progress</h1>
+        <p class="page-sub">Your contributions and reflections across modules.</p>
+
+        <div class="stats-row" id="stats"></div>
+
+        <h2 class="page-title" style="font-size:1.2rem;">Your Recent Posts</h2>
+        <div id="recent-posts" style="margin-top:1rem;">
+          <p class="loading">Loading...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initLayout } from './js/layout.js';
+    import { supabase } from './js/supabase.js';
+
+    const user = await initLayout('my-progress.html');
+    if (!user) throw new Error('Not logged in');
+
+    const statsEl = document.getElementById('stats');
+    const recentEl = document.getElementById('recent-posts');
+
+    async function loadStats() {
+      const { count: postsCount } = await supabase
+        .from('posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      const { count: reflectionsCount } = await supabase
+        .from('posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('type', 'reflection');
+
+      const { count: repliesCount } = await supabase
+        .from('posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .not('parent_id', 'is', null);
+
+      statsEl.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-card-num">${postsCount ?? 0}</div>
+          <div class="stat-card-label">Total Posts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num">${reflectionsCount ?? 0}</div>
+          <div class="stat-card-label">Reflections</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num">${repliesCount ?? 0}</div>
+          <div class="stat-card-label">Replies</div>
+        </div>
+      `;
+    }
+
+    async function loadRecentPosts() {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*, topics(title, slug)')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        recentEl.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        return;
+      }
+
+      if (!data.length) {
+        recentEl.innerHTML = '<p class="empty">Wala ka pang posts. Start joining discussions!</p>';
+        return;
+      }
+
+      recentEl.innerHTML = data.map((p) => `
+        <div class="post" style="margin-bottom:0.75rem;">
+          <div class="post-header">
+            <span class="badge">${p.type === 'reflection' ? 'Reflection' : (p.parent_id ? 'Reply' : 'Question')}</span>
+            ${p.topics ? `<span style="color:#6b7280; font-size:0.85rem;">in <a href="topic.html?slug=${p.topics.slug}" style="color:#14532d;">${p.topics.title}</a></span>` : ''}
+          </div>
+          <p>${p.content}</p>
+        </div>
+      `).join('');
+    }
+
+    loadStats();
+    loadRecentPosts();
+  </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lessons — DocuLearn</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar"></aside>
+    <div class="dashboard-main">
+      <div class="topbar"></div>
+      <div class="dashboard-content">
+        <h1 class="page-title">Lessons</h1>
+        <p class="page-sub">Browse all modules and their materials.</p>
+        <p class="empty">Select a module from the Home page to see lessons.</p>
+      </div>
+    </div>
+  </div>
+  <script type="module">
+    import { initLayout } from './js/layout.js';
+    await initLayout('lessons.html');
+  </script>
+</body>
+</html>

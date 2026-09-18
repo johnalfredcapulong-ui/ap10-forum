@@ -3,43 +3,71 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AP10 Localized Learning</title>
+  <title>Home — DocuLearn</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <div class="dashboard">
+    <aside class="sidebar"></aside>
 
-  <nav class="user-nav" id="user-nav">
-    <span class="user-name" id="nav-name">Loading...</span>
-    <button class="logout-btn" id="logout-btn">Log Out</button>
-  </nav>
-  <header>
-    <div class="header-top">
-      <h1>AP10 Localized Learning</h1>
-      <a href="admin.html" class="admin-link">Admin</a>
+    <div class="dashboard-main">
+      <div class="topbar"></div>
+
+      <div class="dashboard-content">
+        <div class="welcome-card">
+          <h2>Welcome to DocuLearn</h2>
+          <p>Explore local documentaries, lessons, and discussions about contemporary issues in Guimba.</p>
+          <div class="welcome-actions">
+            <a href="documentaries.html">Browse Documentaries</a>
+            <a href="lessons.html">View Lessons</a>
+          </div>
+        </div>
+
+        <h2 class="page-title">Modules</h2>
+        <p class="page-sub">Pick a topic to explore materials, documentaries, and discussion.</p>
+
+        <section id="topics" class="module-grid">
+          <p class="loading">Loading...</p>
+        </section>
+      </div>
     </div>
-    <p>Contemporary issues — local context of Guimba</p>
-  </header>
+  </div>
 
-  <main>
-    <div class="search-bar">
-      <input type="text" id="search" placeholder="Search topics..." />
-    </div>
-
-    <section id="topics" class="topics-grid">
-      <p class="loading">Loading...</p>
-    </section>
-  </main>
-
-  <script type="module" src="js/main.js"></script>
   <script type="module">
-    import { requireAuth, signOut } from './js/auth.js';
+    import { initLayout } from './js/layout.js';
+    import { supabase } from './js/supabase.js';
 
-    const user = await requireAuth();
-    if (user) {
-      document.getElementById('nav-name').textContent = `Hi, ${user.user_metadata.name || 'Student'}`;
+    await initLayout('index.html');
+
+    const topicsEl = document.getElementById('topics');
+
+    async function loadTopics() {
+      const { data, error } = await supabase
+        .from('topics')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        topicsEl.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        return;
+      }
+
+      if (!data.length) {
+        topicsEl.innerHTML = '<p class="empty">No modules yet.</p>';
+        return;
+      }
+
+      topicsEl.innerHTML = data.map((t, i) => `
+        <a class="module-card" href="topic.html?slug=${t.slug}">
+          <span class="module-card-label">Module ${i + 1}</span>
+          <h3>${t.title}</h3>
+          <p>${t.description || ''}</p>
+          <span class="module-card-cta">Explore →</span>
+        </a>
+      `).join('');
     }
 
-    document.getElementById('logout-btn').addEventListener('click', signOut);
-  </script> 
+    loadTopics();
+  </script>
 </body>
 </html>

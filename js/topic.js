@@ -1,6 +1,6 @@
 import { supabase } from './supabase.js';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
-import { getUser } from './auth.js';
+import { initLayout } from './layout.js';
 
 const params = new URLSearchParams(window.location.search);
 const slug = params.get('slug');
@@ -11,10 +11,14 @@ const materialsEl = document.getElementById('materials');
 const videosEl = document.getElementById('videos');
 const postsEl = document.getElementById('posts');
 
-
-
 let topic = null;
 let currentUser = null;
+
+async function init() {
+  currentUser = await initLayout('lessons.html');
+  if (!currentUser) return;
+  loadTopic();
+}
 
 // ---------- Load topic ----------
 async function loadTopic() {

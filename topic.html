@@ -7,67 +7,60 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <nav class="user-nav">
-    <a href="index.html" class="nav-home-link">Home</a>
-    <span class="user-name" id="nav-name">Loading...</span>
-    <button class="logout-btn" id="logout-btn">Log Out</button>
-  </nav>
-  <header>
-    <a href="index.html" class="back-link">← Back to Topics</a>
-    <h1 id="topic-title">Loading...</h1>
-    <p id="topic-description"></p>
-  </header>
+  <div class="dashboard">
+    <aside class="sidebar"></aside>
 
-  <main>
-    <section class="section">
-      <h2>Local Materials</h2>
-      <div id="materials" class="materials-grid">
-        <p class="loading">Loading...</p>
-      </div>
-    </section>
+    <div class="dashboard-main">
+      <div class="topbar"></div>
 
-    <section class="section">
-      <h2>Documentaries</h2>
-      <div id="videos" class="videos-grid">
-        <p class="loading">Loading...</p>
-      </div>
-    </section>
+      <div class="dashboard-content">
+        <a href="index.html" class="back-link" style="display:inline-block; margin-bottom:1rem;">← Back to Modules</a>
+        <h1 class="page-title" id="topic-title">Loading...</h1>
+        <p class="page-sub" id="topic-description"></p>
 
-    <section class="section">
-      <h2>Forum &amp; Reflections</h2>
-
-      <div class="post-form-card">
-        <h3>Post a Question or Reflection</h3>
-        <form id="post-form">
-          <div class="post-form-row">
-            <select id="post-type">
-              <option value="discussion">Question / Discussion</option>
-              <option value="reflection">Reflection</option>
-            </select>
+        <section class="section">
+          <h2>Local Materials</h2>
+          <div id="materials" class="materials-grid">
+            <p class="loading">Loading...</p>
           </div>
-          <textarea id="post-content" placeholder="Share your question, idea, or reflection..." required maxlength="1000"></textarea>
-          <div class="post-form-footer">
-            <span class="post-form-hint">Be respectful to your classmates.</span>
-            <button type="submit" class="btn">Post</button>
-          </div>
-          <p class="form-msg" id="post-msg"></p>
-        </form>
-      </div>
+        </section>
 
-      <div id="posts">
-        <p class="loading">Loading...</p>
+        <section class="section">
+          <h2>Documentaries</h2>
+          <div id="videos" class="videos-grid">
+            <p class="loading">Loading...</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Forum &amp; Reflections</h2>
+
+          <div class="post-form-card">
+            <h3>Post a Question or Reflection</h3>
+            <form id="post-form">
+              <div class="post-form-row">
+                <select id="post-type">
+                  <option value="discussion">Question / Discussion</option>
+                  <option value="reflection">Reflection</option>
+                </select>
+              </div>
+              <textarea id="post-content" placeholder="Share your question, idea, or reflection..." required maxlength="1000"></textarea>
+              <div class="post-form-footer">
+                <span class="post-form-hint">Be respectful to your classmates.</span>
+                <button type="submit" class="btn">Post</button>
+              </div>
+              <p class="form-msg" id="post-msg"></p>
+            </form>
+          </div>
+
+          <div id="posts">
+            <p class="loading">Loading...</p>
+          </div>
+        </section>
       </div>
-    </section>
-  </main>
+    </div>
+  </div>
 
   <script type="module" src="js/topic.js"></script>
-  <script type="module">
-    import { requireAuth, signOut } from './js/auth.js';
-    const user = await requireAuth();
-    if (user) {
-      document.getElementById('nav-name').textContent = user.user_metadata.name || 'Student';
-    }
-    document.getElementById('logout-btn').addEventListener('click', signOut);
-  </script>
 </body>
 </html>
