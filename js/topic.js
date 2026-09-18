@@ -22,7 +22,6 @@ async function init() {
 
 // ---------- Load topic ----------
 async function loadTopic() {
-   currentUser = await getUser();
   if (!slug) {
     titleEl.textContent = 'No topic found';
     return;
@@ -224,7 +223,7 @@ async function loadPosts() {
       .map((r) => `
         <div class="reply">
           <div class="reply-header">
-            <strong>${escapeHtml(p.name || 'Anonymous')}</strong>
+            <strong>${escapeHtml(r.name || 'Anonymous')}</strong>
             <span class="badge">${r.type === 'reflection' ? 'Reflection' : 'Reply'}</span>
           </div>
           <p>${escapeHtml(r.content)}</p>
@@ -244,7 +243,6 @@ async function loadPosts() {
         <button class="reply-toggle" data-parent="${p.id}">Reply</button>
 
         <div class="reply-form-wrap" data-form-for="${p.id}" style="display:none;">
-          
           <textarea class="reply-content" placeholder="Write your reply..." maxlength="1000"></textarea>
           <div class="reply-actions">
             <button class="btn-secondary reply-cancel">Cancel</button>
@@ -270,30 +268,19 @@ function attachPostHandlers() {
     btn.addEventListener('click', () => {
       const wrap = btn.closest('.reply-form-wrap');
       wrap.style.display = 'none';
-      wrap.querySelector('.reply-name').value = '';
       wrap.querySelector('.reply-content').value = '';
     });
   });
 
   postsEl.querySelectorAll('.reply-submit').forEach((btn) => {
     btn.addEventListener('click', async () => {
-      if (!topic) return;
+      if (!topic || !currentUser) return;
 
-       if (!currentUser) {
-          alert('Please log in first.');
-          return;
-        }
+      const wrap = postsEl.querySelector(`[data-form-for="${btn.dataset.parent}"]`);
+      const content = wrap.querySelector('.reply-content').value.trim();
 
-        const wrap = postsEl.querySelector(`[data-form-for="${btn.dataset.parent}"]`);
-        const content = wrap.querySelector('.reply-content').value.trim();
-
-        if (!content) {
-          alert('Reply is required.');
-          return;
-        }
-
-      if (!name || !content) {
-        alert('Name and reply are required.');
+      if (!content) {
+        alert('Reply is required.');
         return;
       }
 
@@ -345,32 +332,32 @@ if (postForm) {
       return;
     }
 
+    if (!currentUser) {
+      postMsg.textContent = 'Please log in first.';
+      postMsg.className = 'form-msg error';
+      return;
+    }
+
     postMsg.textContent = 'Posting...';
     postMsg.className = 'form-msg';
 
-    if (!currentUser) {
-        postMsg.textContent = 'Please log in first.';
-        postMsg.className = 'form-msg error';
-        return;
-      }
+    const content = document.getElementById('post-content').value.trim();
+    const type = document.getElementById('post-type').value;
 
-      const content = document.getElementById('post-content').value.trim();
-      const type = document.getElementById('post-type').value;
+    if (!content) {
+      postMsg.textContent = 'Content is required.';
+      postMsg.className = 'form-msg error';
+      return;
+    }
 
-      if (!content) {
-        postMsg.textContent = 'Content is required.';
-        postMsg.className = 'form-msg error';
-        return;
-      }
-
-      const { error } = await supabase.from('posts').insert({
-        topic_id: topic.id,
-        user_id: currentUser.id,
-        name: currentUser.user_metadata.name || 'Anonymous',
-        content,
-        type,
-        parent_id: null,
-      });
+    const { error } = await supabase.from('posts').insert({
+      topic_id: topic.id,
+      user_id: currentUser.id,
+      name: currentUser.user_metadata.name || 'Anonymous',
+      content,
+      type,
+      parent_id: null,
+    });
 
     if (error) {
       postMsg.textContent = `Error: ${error.message}`;
@@ -386,4 +373,4 @@ if (postForm) {
 }
 
 // ---------- Start ----------
-loadTopic();
+init();
