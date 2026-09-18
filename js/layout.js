@@ -1,12 +1,12 @@
 import { requireAuth, signOut } from './auth.js';
 
 const NAV_ITEMS = [
-  { href: 'index.html',        label: 'Home',          icon: '⌂' },
+  { href: 'index.html',         label: 'Home',          icon: '⌂' },
   { href: 'documentaries.html', label: 'Documentaries', icon: '▶' },
-  { href: 'lessons.html',      label: 'Lessons',       icon: '☰' },
-  { href: 'assessment.html',   label: 'Assessment',    icon: '✓' },
-  { href: 'my-progress.html',  label: 'My Progress',   icon: '↗' },
-  { href: 'about.html',        label: 'About',         icon: 'ⓘ' },
+  { href: 'lessons.html',       label: 'Lessons',       icon: '☰' },
+  { href: 'assessment.html',    label: 'Assessment',    icon: '✓' },
+  { href: 'my-progress.html',   label: 'My Progress',   icon: '↗' },
+  { href: 'about.html',         label: 'About',         icon: 'ⓘ' },
 ];
 
 export async function initLayout(activePage) {
@@ -14,13 +14,20 @@ export async function initLayout(activePage) {
   if (!user) return null;
 
   const name = user.user_metadata.name || 'Student';
+  const role = user.user_metadata.role || 'student';
+
+  // Build the nav item list — add Admin link if role is teacher/admin
+  const items = [...NAV_ITEMS];
+  if (role === 'teacher' || role === 'admin') {
+    items.push({ href: 'admin.html', label: 'Admin', icon: '⚙' });
+  }
 
   // Render sidebar
   const sidebar = document.querySelector('.sidebar');
   if (sidebar) {
     sidebar.innerHTML = `
       <div class="sidebar-brand"><a href="index.html">DocuLearn</a></div>
-      ${NAV_ITEMS.map((item) => `
+      ${items.map((item) => `
         <a href="${item.href}" class="sidebar-link ${item.href === activePage ? 'active' : ''}">
           <span class="link-icon">${item.icon}</span>
           <span>${item.label}</span>
@@ -41,4 +48,13 @@ export async function initLayout(activePage) {
   }
 
   return user;
+}
+
+// Helper to render a list of cards in a page
+export function renderPageError(el, msg) {
+  el.innerHTML = `<p class="error">Error: ${msg}</p>`;
+}
+
+export function renderPageEmpty(el, msg) {
+  el.innerHTML = `<p class="empty">${msg}</p>`;
 }

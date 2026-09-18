@@ -6,144 +6,116 @@
   <title>Admin — AP10 Localized Learning</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body class="admin-body">
-  <header class="admin-header">
-    <div class="admin-header-inner">
-      <div>
-        <a href="index.html" class="back-link">← Back to site</a>
-        <h1>Admin Panel</h1>
-        <p>Manage topics and materials</p>
-      </div>
-      <div id="header-stats" class="header-stats" style="display:none;">
-        <div class="stat">
-          <span class="stat-num" id="stat-topics">–</span>
-          <span class="stat-label">Topics</span>
-        </div>
-        <div class="stat">
-          <span class="stat-num" id="stat-materials">–</span>
-          <span class="stat-label">Materials</span>
-        </div>
-      </div>
-    </div>
-  </header>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar"></aside>
 
-  <main class="admin-main">
+    <div class="dashboard-main">
+      <div class="topbar"></div>
 
-    <section id="gate" class="gate-card">
-      <div class="gate-icon">&#128274;</div>
-      <h2>Enter Admin Password</h2>
-      <p class="gate-sub">Password required to enter.</p>
-      <div class="gate-form">
-        <input type="password" id="pw" placeholder="Password" autofocus />
-        <button id="login-btn" class="btn">Enter</button>
-      </div>
-      <p id="gate-error" class="form-msg error" style="display:none;">Incorrect password.</p>
-    </section>
+      <div class="dashboard-content">
+        <h1 class="page-title">Admin Panel</h1>
+        <p class="page-sub">Manage topics and materials.</p>
 
-    <div id="admin-tools" style="display:none;">
-
-      <div class="tabs">
-        <button class="tab active" data-tab="topic">New Topic</button>
-        <button class="tab" data-tab="material">New Material</button>
-        <button class="tab" data-tab="list">List</button>
-      </div>
-
-      <section class="panel active" id="panel-topic">
-        <div class="panel-card">
-          <h2>Add Topic</h2>
-          <p class="panel-sub">Create a new topic for the AP10 curriculum.</p>
-          <form id="topic-form" class="admin-form">
-            <div class="field">
-              <label>Title</label>
-              <input type="text" name="title" required placeholder="Example: Air Pollution" />
-            </div>
-
-            <div class="field">
-              <label>Slug</label>
-              <input type="text" name="slug" required placeholder="air-pollution" pattern="[a-z0-9-]+" />
-              <small>URL-friendly, lowercase, no spaces. This shows up in the URL.</small>
-            </div>
-
-            <div class="field">
-              <label>Description</label>
-              <textarea name="description" rows="3" placeholder="Short description of the topic"></textarea>
-            </div>
-
-            <button type="submit" class="btn">Save Topic</button>
-            <p class="form-msg" id="topic-msg"></p>
-          </form>
-        </div>
-      </section>
-
-      <section class="panel" id="panel-material">
-        <div class="panel-card">
-          <h2>Add Material</h2>
-          <p class="panel-sub">Add an image, data, or text for a topic.</p>
-          <form id="material-form" class="admin-form">
-            <div class="field">
-              <label>Topic</label>
-              <select name="topic_id" id="topic-select" required>
-                <option value="">— Select a topic —</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label>Type</label>
-              <div class="type-toggle">
-                <label class="type-option">
-                  <input type="radio" name="type" value="image" checked />
-                  <span>Image</span>
-                </label>
-                <label class="type-option">
-                  <input type="radio" name="type" value="text" />
-                  <span>Text / Data</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="field" id="field-url">
-              <label>Image</label>
-              <div class="upload-zone" id="upload-zone">
-                <input type="file" id="image-input" accept="image/*" hidden />
-                <div class="upload-inner">
-                  <div class="upload-icon">&#128247;</div>
-                  <p class="upload-text">Click to choose an image</p>
-                  <p class="upload-hint">JPG, PNG, or WebP — max 5 MB</p>
-                </div>
-                <img id="upload-preview" class="upload-preview" style="display:none;" />
-              </div>
-              <input type="hidden" name="url" id="url-hidden" />
-              <small id="upload-status" class="upload-status"></small>
-            </div>
-
-            <div class="field" id="field-content" style="display:none;">
-              <label>Content</label>
-              <textarea name="content" rows="4" placeholder="Example: According to the municipal hall, 12 tons of garbage per day..."></textarea>
-            </div>
-
-            <div class="field">
-              <label>Caption</label>
-              <input type="text" name="caption" placeholder="Short caption or title" />
-            </div>
-
-            <button type="submit" class="btn">Save Material</button>
-            <p class="form-msg" id="material-msg"></p>
-          </form>
-        </div>
-      </section>
-
-      <section class="panel" id="panel-list">
-        <div class="panel-card">
-          <h2>Recent Materials</h2>
-          <p class="panel-sub">Latest 20 materials. You can delete any mistakes.</p>
-          <div id="recent-materials">
-            <p class="loading">Loading...</p>
+        <div id="admin-tools">
+          <div class="tabs">
+            <button class="tab active" data-tab="topic">New Topic</button>
+            <button class="tab" data-tab="material">New Material</button>
+            <button class="tab" data-tab="list">List</button>
           </div>
-        </div>
-      </section>
 
+          <!-- Panel: Topic -->
+          <section class="panel active" id="panel-topic">
+            <div class="panel-card">
+              <h2>Add Topic</h2>
+              <p class="panel-sub">Create a new module for the AP10 curriculum.</p>
+              <form id="topic-form" class="admin-form">
+                <div class="field">
+                  <label>Title</label>
+                  <input type="text" name="title" required placeholder="Example: Air Pollution" />
+                </div>
+                <div class="field">
+                  <label>Slug</label>
+                  <input type="text" name="slug" required placeholder="air-pollution" pattern="[a-z0-9-]+" />
+                  <small>URL-friendly, lowercase, no spaces.</small>
+                </div>
+                <div class="field">
+                  <label>Description</label>
+                  <textarea name="description" rows="3" placeholder="Short description of the topic"></textarea>
+                </div>
+                <button type="submit" class="btn">Save Topic</button>
+                <p class="form-msg" id="topic-msg"></p>
+              </form>
+            </div>
+          </section>
+
+          <!-- Panel: Material -->
+          <section class="panel" id="panel-material">
+            <div class="panel-card">
+              <h2>Add Material</h2>
+              <p class="panel-sub">Add an image, data, or text for a topic.</p>
+              <form id="material-form" class="admin-form">
+                <div class="field">
+                  <label>Topic</label>
+                  <select name="topic_id" id="topic-select" required>
+                    <option value="">— Select a topic —</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Type</label>
+                  <div class="type-toggle">
+                    <label class="type-option">
+                      <input type="radio" name="type" value="image" checked />
+                      <span>Image</span>
+                    </label>
+                    <label class="type-option">
+                      <input type="radio" name="type" value="text" />
+                      <span>Text / Data</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="field" id="field-url">
+                  <label>Image</label>
+                  <div class="upload-zone" id="upload-zone">
+                    <input type="file" id="image-input" accept="image/*" hidden />
+                    <div class="upload-inner">
+                      <div class="upload-icon">&#128247;</div>
+                      <p class="upload-text">Click to choose an image</p>
+                      <p class="upload-hint">JPG, PNG, or WebP — max 5 MB</p>
+                    </div>
+                    <img id="upload-preview" class="upload-preview" style="display:none;" />
+                  </div>
+                  <input type="hidden" name="url" id="url-hidden" />
+                  <small id="upload-status" class="upload-status"></small>
+                </div>
+                <div class="field" id="field-content" style="display:none;">
+                  <label>Content</label>
+                  <textarea name="content" rows="4" placeholder="Text or data content..."></textarea>
+                </div>
+                <div class="field">
+                  <label>Caption</label>
+                  <input type="text" name="caption" placeholder="Short caption or title" />
+                </div>
+                <button type="submit" class="btn">Save Material</button>
+                <p class="form-msg" id="material-msg"></p>
+              </form>
+            </div>
+          </section>
+
+          <!-- Panel: List -->
+          <section class="panel" id="panel-list">
+            <div class="panel-card">
+              <h2>Recent Materials</h2>
+              <p class="panel-sub">Latest 20 materials. You can delete any mistakes.</p>
+              <div id="recent-materials">
+                <p class="loading">Loading...</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
     </div>
-  </main>
+  </div>
 
   <script type="module" src="js/admin.js"></script>
 </body>

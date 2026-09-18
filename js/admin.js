@@ -1,24 +1,26 @@
 import { supabase } from './supabase.js';
+import { initLayout } from './layout.js';
 
-const ADMIN_PASSWORD = 'guimba2026';
+// ---------- Verify user + role ----------
+const user = await initLayout('admin.html');
+if (!user) throw new Error('Not logged in');
+
+const role = user.user_metadata.role || 'student';
+if (role !== 'teacher' && role !== 'admin') {
+  document.querySelector('.dashboard-content').innerHTML = `
+    <h1 class="page-title">Access Denied</h1>
+    <p class="page-sub">This area is for teachers only.</p>
+  `;
+  throw new Error('Not authorized');
+}
 
 // ---------- DOM refs ----------
-const gate = document.getElementById('gate');
-const tools = document.getElementById('admin-tools');
-const pwInput = document.getElementById('pw');
-const loginBtn = document.getElementById('login-btn');
-const gateError = document.getElementById('gate-error');
-
 const topicForm = document.getElementById('topic-form');
 const materialForm = document.getElementById('material-form');
 const topicSelect = document.getElementById('topic-select');
 const topicMsg = document.getElementById('topic-msg');
 const materialMsg = document.getElementById('material-msg');
 const recentEl = document.getElementById('recent-materials');
-
-const headerStats = document.getElementById('header-stats');
-const statTopics = document.getElementById('stat-topics');
-const statMaterials = document.getElementById('stat-materials');
 
 const uploadZone = document.getElementById('upload-zone');
 const imageInput = document.getElementById('image-input');
@@ -29,32 +31,9 @@ const uploadStatus = document.getElementById('upload-status');
 const fieldUrl = document.getElementById('field-url');
 const fieldContent = document.getElementById('field-content');
 
-// ---------- Login ----------
-loginBtn.addEventListener('click', () => {
-  if (pwInput.value === ADMIN_PASSWORD) {
-    sessionStorage.setItem('admin', 'yes');
-    showTools();
-  } else {
-    gateError.style.display = 'block';
-  }
-});
-
-pwInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') loginBtn.click();
-});
-
-function showTools() {
-  gate.style.display = 'none';
-  tools.style.display = 'block';
-  headerStats.style.display = 'flex';
-  loadTopicOptions();
-  loadRecentMaterials();
-  loadStats();
-}
-
-if (sessionStorage.getItem('admin') === 'yes') {
-  showTools();
-}
+// ---------- Initial load ----------
+loadTopicOptions();
+loadRecentMaterials();
 
 // ---------- Tabs ----------
 document.querySelectorAll('.tab').forEach((tab) => {
@@ -78,16 +57,6 @@ materialForm.addEventListener('change', (e) => {
     }
   }
 });
-
-// ---------- Load stats ----------
-async function loadStats() {
-  const [topicsRes, materialsRes] = await Promise.all([
-    supabase.from('topics').select('*', { count: 'exact', head: true }),
-    supabase.from('materials').select('*', { count: 'exact', head: true }),
-  ]);
-  statTopics.textContent = topicsRes.count ?? '0';
-  statMaterials.textContent = materialsRes.count ?? '0';
-}
 
 // ---------- Load topics ----------
 async function loadTopicOptions() {
@@ -130,7 +99,6 @@ topicForm.addEventListener('submit', async (e) => {
   topicMsg.className = 'form-msg success';
   topicForm.reset();
   loadTopicOptions();
-  loadStats();
 });
 
 // ---------- Image upload ----------
@@ -258,7 +226,6 @@ materialForm.addEventListener('submit', async (e) => {
   materialForm.reset();
   resetUpload();
   loadRecentMaterials();
-  loadStats();
 });
 
 // ---------- Recent materials ----------
@@ -306,7 +273,6 @@ async function loadRecentMaterials() {
       }
 
       loadRecentMaterials();
-      loadStats();
     });
   });
 }

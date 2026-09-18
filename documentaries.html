@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Documentaries — DocuLearn</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar"></aside>
+
+    <div class="dashboard-main">
+      <div class="topbar"></div>
+
+      <div class="dashboard-content">
+        <h1 class="page-title">Documentaries</h1>
+        <p class="page-sub">Curated YouTube documentaries for each module.</p>
+
+        <div class="search-bar" style="margin-bottom:1.5rem;">
+          <input type="text" id="search" placeholder="Search documentaries..." />
+        </div>
+
+        <div id="documentaries">
+          <p class="loading">Loading...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initLayout } from './js/layout.js';
+    import { supabase } from './js/supabase.js';
+
+    await initLayout('documentaries.html');
+
+    const docsEl = document.getElementById('documentaries');
+    const searchEl = document.getElementById('search');
+
+    let allDocs = [];
+
+    async function loadDocs() {
+      // Get all cached YouTube results
+      const { data, error } = await supabase
+        .from('yt_cache')
+        .select('query, results')
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        docsEl.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        return;
+      }
+
+      // Flatten: each cached query has an array of videos
+      allDocs = [];
+      data.forEach((row) => {
+        (row.results || []).forEach((v) => {
+          allDocs.push({
+            topicTitle: row.query,
+            videoId: v.videoId,
+            title: v.title,
+            thumbnail: v.thumbnail,
+            channel: v.channel,
+          });
+        });
+      });
+
+      renderDocs(allDocs);
+    }
+
+    function renderDocs(docs) {
+      if (!docs.length) {
+        docsEl.innerHTML = '<p class="empty">No documentaries yet. Visit a module to load them.</p>';
+        return;
+      }
+
+      docsEl.innerHTML = `
+        <div class="videos-grid">
+          ${docs.map((d) => `
+            <div class="video-card" data-video-id="${d.videoId}" data-title="${d.title.replace(/"/g, '&quot;')}">
+              <div class="video-thumb">
+                <img src="${d.thumbnail}" alt="${d.title}" loading="lazy" />
+                <div class="play-button">▶</div>
+              </div>
+              <h3>${d.title}</h3>
+              <p>${d.channel} · <span style="color:#14532d;">${d.topicTitle}</span></p>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      document.querySelectorAll('.video-card').forEach((card) => {
+        card.addEventListener('click', () => {
+          openVideoModal(card.dataset.videoId, card.dataset.title);
+        });
+      });
+    }
+
+    // Same modal function as topic.js
+    function openVideoModal(videoId, title) {
+      const modal = document.createElement('div');
+      modal.className = 'video-modal';
+      modal.innerHTML = `
+        <div class="video-modal-backdrop"></div>
+        <div class="video-modal-content">
+          <button class="video-modal-close" aria-label="Close">&times;</button>
+          <div class="video-modal-player">
+            <iframe
+              src="https://www.youtube.com/embed/${videoId}?autoplay=1"
+              title="${title}"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      document.body.style.overflow = 'hidden';
+
+      const close = () => {
+        modal.remove();
+        document.body.style.overflow = '';
+      };
+      modal.querySelector('.video-modal-close').addEventListener('click', close);
+      modal.querySelector('.video-modal-backdrop').addEventListener('click', close);
+      document.addEventListener('keydown', function esc(e) {
+        if (e.key === 'Escape') {
+          close();
+          document.removeEventListener('keydown', esc);
+        }
+      });
+    }
+
+    searchEl.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      const filtered = allDocs.filter((d) =>
+        d.title.toLowerCase().includes(q) ||
+        d.channel.toLowerCase().includes(q) ||
+        d.topicTitle.toLowerCase().includes(q)
+      );
+      renderDocs(filtered);
+    });
+
+    loadDocs();
+  </script>
+</body>
+</html>

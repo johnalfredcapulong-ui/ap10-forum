@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assessment — DocuLearn</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar"></aside>
+
+    <div class="dashboard-main">
+      <div class="topbar"></div>
+
+      <div class="dashboard-content">
+        <h1 class="page-title">Assessment</h1>
+        <p class="page-sub">Reflections from you and your classmates across all modules.</p>
+
+        <div class="welcome-card" style="margin-bottom:2rem;">
+          <h2>Reflection-Based Assessment</h2>
+          <p>Instead of quizzes, DocuLearn uses reflections to check understanding. Read your classmates' reflections, then add your own from any module page.</p>
+          <div class="welcome-actions">
+            <a href="index.html">Go to Modules</a>
+          </div>
+        </div>
+
+        <div id="assessments">
+          <p class="loading">Loading...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initLayout } from './js/layout.js';
+    import { supabase } from './js/supabase.js';
+
+    const user = await initLayout('assessment.html');
+    if (!user) throw new Error('Not logged in');
+
+    const el = document.getElementById('assessments');
+
+    async function loadReflections() {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*, topics(title, slug)')
+        .eq('type', 'reflection')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) {
+        el.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        return;
+      }
+
+      if (!data.length) {
+        el.innerHTML = '<p class="empty">No reflections yet. Be the first to share one!</p>';
+        return;
+      }
+
+      el.innerHTML = data.map((p) => `
+        <div class="post" style="margin-bottom:1rem;">
+          <div class="post-header">
+            <strong>${escapeHtml(p.name || 'Anonymous')}</strong>
+            <span class="badge">Reflection</span>
+            ${p.topics ? `<span style="color:#6b7280; font-size:0.85rem;">· <a href="topic.html?slug=${p.topics.slug}" style="color:#14532d;">${p.topics.title}</a></span>` : ''}
+          </div>
+          <p>${escapeHtml(p.content)}</p>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    loadReflections();
+  </script>
+</body>
+</html>
