@@ -23,51 +23,144 @@
           </div>
         </div>
 
-        <h2 class="page-title">Modules</h2>
-        <p class="page-sub">Pick a topic to explore materials, documentaries, and discussion.</p>
+        <div class="home-grid">
+          <div class="home-main">
+            <h2 class="page-title" style="font-size:1.2rem;">Modules</h2>
+            <p class="page-sub">Pick a topic to explore materials, documentaries, and discussion.</p>
 
-        <section id="topics" class="module-grid">
-          <p class="loading">Loading...</p>
-        </section>
+            <section id="topics" class="module-grid">
+              <p class="loading">Loading...</p>
+            </section>
+          </div>
+
+          <aside class="home-side">
+            <div class="side-card">
+              <h3 class="side-card-title">Featured Documentary</h3>
+              <div id="featured-video">
+                <p class="loading">Loading...</p>
+              </div>
+            </div>
+
+            <div class="side-card">
+              <h3 class="side-card-title">Quick Links</h3>
+              <ul class="quick-links">
+                <li><a href="lessons.html">Learning Objectives</a></li>
+                <li><a href="documentaries.html">Documentaries</a></li>
+                <li><a href="assessment.html">Discussion Forum</a></li>
+                <li><a href="my-progress.html">My Progress</a></li>
+                <li><a href="about.html">Help and Support</a></li>
+              </ul>
+            </div>
+          </aside>
+        </div>
       </div>
     </div>
   </div>
 
   <script type="module">
-    import { initLayout } from './js/layout.js';
-    import { supabase } from './js/supabase.js';
+  import { initLayout } from './js/layout.js';
+  import { supabase } from './js/supabase.js';
 
-    await initLayout('index.html');
+  await initLayout('index.html');
 
-    const topicsEl = document.getElementById('topics');
+  const topicsEl = document.getElementById('topics');
+  const featuredEl = document.getElementById('featured-video');
 
-    async function loadTopics() {
-      const { data, error } = await supabase
-        .from('topics')
-        .select('*')
-        .order('created_at', { ascending: true });
+  async function loadTopics() {
+    const { data, error } = await supabase
+      .from('topics')
+      .select('*')
+      .order('created_at', { ascending: true });
 
-      if (error) {
-        topicsEl.innerHTML = `<p class="error">Error: ${error.message}</p>`;
-        return;
-      }
-
-      if (!data.length) {
-        topicsEl.innerHTML = '<p class="empty">No modules yet.</p>';
-        return;
-      }
-
-      topicsEl.innerHTML = data.map((t, i) => `
-        <a class="module-card" href="topic.html?slug=${t.slug}">
-          <span class="module-card-label">Module ${i + 1}</span>
-          <h3>${t.title}</h3>
-          <p>${t.description || ''}</p>
-          <span class="module-card-cta">Explore →</span>
-        </a>
-      `).join('');
+    if (error) {
+      topicsEl.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+      return;
     }
 
-    loadTopics();
-  </script>
+    if (!data.length) {
+      topicsEl.innerHTML = '<p class="empty">No modules yet.</p>';
+      return;
+    }
+
+    topicsEl.innerHTML = data.map((t, i) => `
+      <a class="module-card" href="topic.html?slug=${t.slug}">
+        <span class="module-card-label">Module ${i + 1}</span>
+        <h3>${t.title}</h3>
+        <p>${t.description || ''}</p>
+        <span class="module-card-cta">Explore →</span>
+      </a>
+    `).join('');
+  }
+
+  async function loadFeaturedVideo() {
+    // Pick the most recent cached video
+    const { data, error } = await supabase
+      .from('yt_cache')
+      .select('results, created_at')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error || !data || !data.results || !data.results.length) {
+      featuredEl.innerHTML = '<p class="empty">No documentary yet.</p>';
+      return;
+    }
+
+    const video = data.results[0];
+
+    featuredEl.innerHTML = `
+      <div class="video-card" data-video-id="${video.videoId}" data-title="${video.title.replace(/"/g, '&quot;')}">
+        <div class="video-thumb">
+          <img src="${video.thumbnail}" alt="${video.title}" loading="lazy" />
+          <div class="play-button">▶</div>
+        </div>
+        <h3 style="font-size:0.95rem; padding: 0.75rem 1rem 0.25rem; color:#14532d; line-height:1.35;">${video.title}</h3>
+        <p style="font-size:0.82rem; color:#6b7280; padding: 0 1rem 0.85rem;">${video.channel}</p>
+      </div>
+    `;
+
+    featuredEl.querySelector('.video-card').addEventListener('click', () => {
+      openVideoModal(video.videoId, video.title);
+    });
+  }
+
+  function openVideoModal(videoId, title) {
+    const modal = document.createElement('div');
+    modal.className = 'video-modal';
+    modal.innerHTML = `
+      <div class="video-modal-backdrop"></div>
+      <div class="video-modal-content">
+        <button class="video-modal-close" aria-label="Close">&times;</button>
+        <div class="video-modal-player">
+          <iframe
+            src="https://www.youtube.com/embed/${videoId}?autoplay=1"
+            title="${title}"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+
+    const close = () => {
+      modal.remove();
+      document.body.style.overflow = '';
+    };
+    modal.querySelector('.video-modal-close').addEventListener('click', close);
+    modal.querySelector('.video-modal-backdrop').addEventListener('click', close);
+    document.addEventListener('keydown', function esc(e) {
+      if (e.key === 'Escape') {
+        close();
+        document.removeEventListener('keydown', esc);
+      }
+    });
+  }
+
+  loadTopics();
+  loadFeaturedVideo();
+</script>
 </body>
 </html>

@@ -1343,3 +1343,81 @@ main {
     padding: 1.5rem 1rem;
   }
 }
+
+/* ============================
+   Home page 2-column layout
+   ============================ */
+.home-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 2rem;
+  align-items: start;
+}
+
+.home-main { min-width: 0; }
+
+.home-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: sticky;
+  top: 1.5rem;
+}
+
+.side-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 1.25rem;
+}
+
+.side-card-title {
+  font-size: 0.95rem;
+  color: #14532d;
+  font-weight: 700;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #d1fae5;
+}
+
+.quick-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.quick-links a {
+  display: block;
+  padding: 0.5rem 0.65rem;
+  color: #4b5563;
+  text-decoration: none;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.quick-links a:hover {
+  background: #f0fdf4;
+  color: #14532d;
+  padding-left: 0.85rem;
+}
+
+/* Featured video card — tight version */
+#featured-video .video-card {
+  box-shadow: none;
+  border: 1px solid #e5e7eb;
+}
+
+/* Responsive collapse */
+@media (max-width: 900px) {
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-side {
+    position: static;
+  }
+}
