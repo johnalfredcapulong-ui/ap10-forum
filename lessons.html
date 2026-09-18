@@ -9,18 +9,71 @@
 <body>
   <div class="dashboard">
     <aside class="sidebar"></aside>
+
     <div class="dashboard-main">
       <div class="topbar"></div>
+
       <div class="dashboard-content">
         <h1 class="page-title">Lessons</h1>
-        <p class="page-sub">Browse all modules and their materials.</p>
-        <p class="empty">Select a module from the Home page to see lessons.</p>
+        <p class="page-sub">All modules and the materials available for each.</p>
+
+        <div id="lessons">
+          <p class="loading">Loading...</p>
+        </div>
       </div>
     </div>
   </div>
+
   <script type="module">
     import { initLayout } from './js/layout.js';
+    import { supabase } from './js/supabase.js';
+
     await initLayout('lessons.html');
+
+    const lessonsEl = document.getElementById('lessons');
+
+    async function loadLessons() {
+      // Fetch topics + their materials
+      const { data: topics, error: topicsErr } = await supabase
+        .from('topics')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (topicsErr) {
+        lessonsEl.innerHTML = `<p class="error">Error: ${topicsErr.message}</p>`;
+        return;
+      }
+
+      if (!topics.length) {
+        lessonsEl.innerHTML = '<p class="empty">No lessons yet.</p>';
+        return;
+      }
+
+      // Get counts per topic
+      const { data: materials } = await supabase
+        .from('materials')
+        .select('topic_id');
+
+      const counts = {};
+      (materials || []).forEach((m) => {
+        counts[m.topic_id] = (counts[m.topic_id] || 0) + 1;
+      });
+
+      lessonsEl.innerHTML = `
+        <div class="module-grid">
+          ${topics.map((t, i) => `
+            <a class="module-card" href="topic.html?slug=${t.slug}">
+              <span class="module-card-label">Module ${i + 1}</span>
+              <h3>${t.title}</h3>
+              <p>${t.description || ''}</p>
+              <span class="module-card-cta">${counts[t.id] || 0} material${counts[t.id] === 1 ? '' : 's'} · Open →</span>
+            </a>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    loadLessons();
   </script>
 </body>
 </html>

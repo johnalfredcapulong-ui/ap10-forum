@@ -1,6 +1,7 @@
 import { supabase } from './supabase.js';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 import { initLayout } from './layout.js';
+import { getUser } from './auth.js';
 
 const params = new URLSearchParams(window.location.search);
 const slug = params.get('slug');
@@ -44,9 +45,11 @@ async function loadTopic() {
   titleEl.textContent = topic.title;
   descEl.textContent = topic.description || '';
 
+  
   loadMaterials();
   loadPosts();
   loadVideos();
+  setupRealtime();
 }
 
 // ---------- Materials ----------
@@ -371,6 +374,37 @@ if (postForm) {
     loadPosts();
   });
 }
+
+// ---------- Realtime subscription ----------
+let realtimeChannel = null;
+
+function setupRealtime() {
+  if (!topic) return;
+
+  realtimeChannel = supabase
+    .channel(`posts-${topic.id}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'posts',
+        filter: `topic_id=eq.${topic.id}`,
+      },
+      (payload) => {
+        console.log('New post arrived via realtime:', payload.new);
+        loadPosts(); // Simplest: re-fetch everything
+      }
+    )
+    .subscribe();
+}
+
+// Clean up when leaving the page
+window.addEventListener('beforeunload', () => {
+  if (realtimeChannel) {
+    supabase.removeChannel(realtimeChannel);
+  }
+});
 
 // ---------- Start ----------
 init();
