@@ -17,11 +17,11 @@ export async function initLayout(activePage) {
   const role = user.user_metadata.role || 'student';
 
   // Build the nav item list — add Admin link if role is teacher/admin
-  const items = [...NAV_ITEMS];
+ const items = [...NAV_ITEMS];
   if (role === 'teacher' || role === 'admin') {
+    items.push({ href: 'teacher.html', label: 'Students', icon: '☺' });
     items.push({ href: 'admin.html', label: 'Admin', icon: '⚙' });
   }
-
   // Render sidebar
   const sidebar = document.querySelector('.sidebar');
   if (sidebar) {
@@ -41,8 +41,11 @@ export async function initLayout(activePage) {
   const topbar = document.querySelector('.topbar');
   if (topbar) {
     topbar.innerHTML = `
-      <span class="topbar-greeting">Magandang araw, ${name}!</span>
-      <button class="topbar-logout" id="logout-btn">Log Out</button>
+      <span class="topbar-brand">DocuLearn</span>
+      <div class="topbar-right">
+        <span class="topbar-greeting">Magandang araw, ${name}!</span>
+        <button class="topbar-logout" id="logout-btn">Log Out</button>
+      </div>
     `;
     document.getElementById('logout-btn').addEventListener('click', signOut);
   }

@@ -2,6 +2,7 @@ import { supabase } from './supabase.js';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 import { initLayout } from './layout.js';
 import { getUser } from './auth.js';
+import { highlightTerms } from './glossary.js';
 
 const params = new URLSearchParams(window.location.search);
 const slug = params.get('slug');
@@ -86,6 +87,7 @@ async function loadMaterials() {
       </div>
     `;
   }).join('');
+  highlightTerms(materialsEl);
 }
 
 // ---------- Videos ----------

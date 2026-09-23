@@ -1421,3 +1421,168 @@ main {
     position: static;
   }
 }
+
+/* ============================
+   Glossary term highlighting
+   ============================ */
+.glossary-term {
+  border-bottom: 1px dashed #15803d;
+  color: #14532d;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.glossary-term:hover {
+  background: #d1fae5;
+}
+
+.glossary-popup {
+  position: fixed;
+  background: white;
+  border: 2px solid #14532d;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  max-width: 320px;
+  box-shadow: 0 10px 40px rgba(20, 83, 45, 0.2);
+  z-index: 1000;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.glossary-popup-term {
+  font-weight: 700;
+  color: #14532d;
+  font-size: 0.95rem;
+  margin-bottom: 0.4rem;
+  text-transform: capitalize;
+  padding-right: 1.5rem;
+}
+
+.glossary-popup-def {
+  color: #374151;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.glossary-popup-close {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  line-height: 1;
+}
+
+.glossary-popup-close:hover {
+  color: #14532d;
+}
+
+/* ============================
+   Students table (teacher view)
+   ============================ */
+.students-table-wrap {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.student-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.student-table th {
+  text-align: left;
+  padding: 0.85rem 1rem;
+  background: #f9fafb;
+  color: #14532d;
+  font-weight: 600;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.student-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  color: #4b5563;
+}
+
+.student-table tr:last-child td {
+  border-bottom: none;
+}
+
+.student-table tr:hover td {
+  background: #f9fafb;
+}
+
+.student-table strong {
+  color: #14532d;
+}
+
+/* Refresh — match mockup vibe */
+.topbar {
+  background: linear-gradient(135deg, #14532d 0%, #1e3a5f 100%);
+  color: white;
+  padding: 1rem 2rem;
+  border-bottom: none;
+}
+
+.topbar-greeting {
+  color: white;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.topbar-logout {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: white;
+  padding: 0.45rem 1rem;
+}
+
+.topbar-logout:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: white;
+  color: white;
+}
+
+/* Softer page bg */
+body {
+  background: #f5f7f9;
+}
+
+/* Rounder cards */
+.module-card,
+.side-card,
+.post,
+.post-form-card,
+.stat-card,
+.material-card {
+  border-radius: 14px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.topbar-brand {
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}

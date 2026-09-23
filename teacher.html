@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Students — DocuLearn</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar"></aside>
+
+    <div class="dashboard-main">
+      <div class="topbar"></div>
+
+      <div class="dashboard-content">
+        <h1 class="page-title">Students</h1>
+        <p class="page-sub">Monitor activity and engagement across your class.</p>
+
+        <div class="stats-row" id="summary-stats">
+          <p class="loading">Loading...</p>
+        </div>
+
+        <div class="search-bar" style="margin-bottom:1rem;">
+          <input type="text" id="search" placeholder="Search students by name or email..." />
+        </div>
+
+        <div id="students-table" class="students-table-wrap">
+          <p class="loading">Loading...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initLayout } from './js/layout.js';
+    import { supabase } from './js/supabase.js';
+
+    const user = await initLayout('teacher.html');
+    if (!user) throw new Error('Not logged in');
+
+    const role = user.user_metadata.role || 'student';
+    if (role !== 'teacher' && role !== 'admin') {
+      document.querySelector('.dashboard-content').innerHTML = `
+        <h1 class="page-title">Access Denied</h1>
+        <p class="page-sub">This area is for teachers only.</p>
+      `;
+      throw new Error('Not authorized');
+    }
+
+    const summaryEl = document.getElementById('summary-stats');
+    const tableEl = document.getElementById('students-table');
+    const searchEl = document.getElementById('search');
+
+    let allStudents = [];
+
+    async function loadStudents() {
+      // Get all posts to derive per-student stats
+      const { data: posts, error } = await supabase
+        .from('posts')
+        .select('user_id, name, type, parent_id, created_at')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        tableEl.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        return;
+      }
+
+      // Group by user_id
+      const map = new Map();
+      posts.forEach((p) => {
+        const key = p.user_id || 'anonymous';
+        if (!map.has(key)) {
+          map.set(key, {
+            user_id: key,
+            name: p.name || 'Anonymous',
+            totalPosts: 0,
+            questions: 0,
+            reflections: 0,
+            replies: 0,
+            lastActive: p.created_at,
+          });
+        }
+        const s = map.get(key);
+        s.totalPosts++;
+        if (p.parent_id) s.replies++;
+        else if (p.type === 'reflection') s.reflections++;
+        else s.questions++;
+        if (p.created_at > s.lastActive) s.lastActive = p.created_at;
+      });
+
+      allStudents = Array.from(map.values()).sort((a, b) => b.totalPosts - a.totalPosts);
+
+      // Summary
+      const totalStudents = allStudents.length;
+      const totalPosts = posts.length;
+      const totalReflections = allStudents.reduce((sum, s) => sum + s.reflections, 0);
+
+      summaryEl.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-card-num">${totalStudents}</div>
+          <div class="stat-card-label">Active Students</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num">${totalPosts}</div>
+          <div class="stat-card-label">Total Posts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num">${totalReflections}</div>
+          <div class="stat-card-label">Reflections</div>
+        </div>
+      `;
+
+      renderTable(allStudents);
+    }
+
+    function renderTable(students) {
+      if (!students.length) {
+        tableEl.innerHTML = '<p class="empty">No student activity yet.</p>';
+        return;
+      }
+
+      tableEl.innerHTML = `
+        <table class="student-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Posts</th>
+              <th>Questions</th>
+              <th>Reflections</th>
+              <th>Replies</th>
+              <th>Last Active</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${students.map((s) => `
+              <tr>
+                <td><strong>${escapeHtml(s.name)}</strong></td>
+                <td>${s.totalPosts}</td>
+                <td>${s.questions}</td>
+                <td>${s.reflections}</td>
+                <td>${s.replies}</td>
+                <td>${formatDate(s.lastActive)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function formatDate(iso) {
+      const d = new Date(iso);
+      const now = new Date();
+      const diffMs = now - d;
+      const diffHrs = diffMs / (1000 * 60 * 60);
+
+      if (diffHrs < 1) return 'Just now';
+      if (diffHrs < 24) return `${Math.floor(diffHrs)}h ago`;
+      const diffDays = Math.floor(diffHrs / 24);
+      if (diffDays < 7) return `${diffDays}d ago`;
+      return d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    searchEl.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      const filtered = allStudents.filter((s) =>
+        s.name.toLowerCase().includes(q)
+      );
+      renderTable(filtered);
+    });
+
+    loadStudents();
+  </script>
+</body>
+</html>
