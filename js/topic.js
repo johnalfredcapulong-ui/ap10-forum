@@ -1,7 +1,6 @@
 import { supabase } from './supabase.js';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 import { initLayout } from './layout.js';
-import { getUser } from './auth.js';
 import { highlightTerms } from './glossary.js';
 
 const params = new URLSearchParams(window.location.search);
@@ -46,13 +45,13 @@ async function loadTopic() {
   titleEl.textContent = topic.title;
   descEl.textContent = topic.description || '';
 
-  
   loadMaterials();
   loadPosts();
   loadVideos();
   setupRealtime();
 }
 
+// ---------- Materials ----------
 async function loadMaterials() {
   const { data, error } = await supabase
     .from('materials')
@@ -71,7 +70,6 @@ async function loadMaterials() {
     return;
   }
 
-  // Split by section
   const infoItems = data.filter((m) => m.section === 'info' || (!m.section && m.type === 'text'));
   const imageItems = data.filter((m) => m.section === 'images' || (!m.section && m.type === 'image'));
   const discussionItems = data.filter((m) => m.section === 'discussion');
@@ -87,7 +85,7 @@ async function loadMaterials() {
           ${infoItems.map((m) => `
             <div class="info-block">
               ${m.caption ? `<h4>${escapeHtml(m.caption)}</h4>` : ''}
-              <p>${escapeHtml(m.content || '')}</p>
+              <div class="info-block-content">${formatContent(m.content || '')}</div>
             </div>
           `).join('')}
         </div>
@@ -130,7 +128,7 @@ async function loadMaterials() {
             return `
               <div class="info-block">
                 ${m.caption ? `<h4>${escapeHtml(m.caption)}</h4>` : ''}
-                <p>${escapeHtml(m.content || '')}</p>
+                <div class="info-block-content">${formatContent(m.content || '')}</div>
               </div>
             `;
           }).join('')}
@@ -140,12 +138,44 @@ async function loadMaterials() {
   }
 
   materialsEl.innerHTML = html;
-
-  // Apply glossary highlighting to text
   highlightTerms(materialsEl);
 }
 
+// ---------- Content formatter ----------
+// Preserves paragraphs and turns bullet markers into real lists
+function formatContent(text) {
+  const escaped = escapeHtml(text);
 
+  // Normalize: ensure a newline before every bullet marker (•, -, *)
+  const normalized = escaped.replace(/\s*[•\u2022]\s+/g, '\n• ');
+
+  const lines = normalized.split(/\r?\n/);
+
+  let html = '';
+  let inList = false;
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+
+    if (/^[•\-\*]\s+/.test(line)) {
+      if (!inList) {
+        html += '<ul>';
+        inList = true;
+      }
+      html += `<li>${line.replace(/^[•\-\*]\s+/, '')}</li>`;
+    } else {
+      if (inList) {
+        html += '</ul>';
+        inList = false;
+      }
+      html += `<p>${line}</p>`;
+    }
+  }
+
+  if (inList) html += '</ul>';
+  return html;
+}
 
 // ---------- Videos ----------
 async function loadVideos() {
@@ -452,13 +482,12 @@ function setupRealtime() {
       },
       (payload) => {
         console.log('New post arrived via realtime:', payload.new);
-        loadPosts(); // Simplest: re-fetch everything
+        loadPosts();
       }
     )
     .subscribe();
 }
 
-// Clean up when leaving the page
 window.addEventListener('beforeunload', () => {
   if (realtimeChannel) {
     supabase.removeChannel(realtimeChannel);

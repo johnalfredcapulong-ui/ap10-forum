@@ -1956,3 +1956,40 @@ body {
   font-size: 0.95rem;
   line-height: 1.65;
 }
+
+/* ============================
+   Formatted info-block content
+   ============================ */
+.info-block-content {
+  color: #374151;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.info-block-content p {
+  margin-bottom: 0.85rem;
+}
+
+.info-block-content p:last-child {
+  margin-bottom: 0;
+}
+
+.info-block-content ul {
+  margin: 0.5rem 0 0.85rem 0;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.info-block-content ul:last-child {
+  margin-bottom: 0;
+}
+
+.info-block-content li {
+  margin-bottom: 0.35rem;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.info-block-content li:last-child {
+  margin-bottom: 0;
+}
