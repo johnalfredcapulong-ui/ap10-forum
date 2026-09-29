@@ -4,6 +4,7 @@ const NAV_ITEMS = [
   { href: 'index.html',         label: 'Home',          icon: '⌂' },
   { href: 'documentaries.html', label: 'Documentaries', icon: '▶' },
   { href: 'lessons.html',       label: 'Lessons',       icon: '☰' },
+  { href: 'glossary.html',      label: 'Glossary',      icon: '❋' },
   { href: 'assessment.html',    label: 'Assessment',    icon: '✓' },
   { href: 'my-progress.html',   label: 'My Progress',   icon: '↗' },
   { href: 'about.html',         label: 'About',         icon: 'ⓘ' },

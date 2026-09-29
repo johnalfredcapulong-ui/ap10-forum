@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Glossary — DocuLearn</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar"></aside>
+
+    <div class="dashboard-main">
+      <div class="topbar"></div>
+
+      <div class="dashboard-content">
+        <h1 class="page-title">Glossary</h1>
+        <p class="page-sub">Mga mahirap na salita at ang kanilang kahulugan.</p>
+
+        <div class="search-bar" style="margin-bottom:1.5rem;">
+          <input type="text" id="search" placeholder="Search terms..." />
+        </div>
+
+        <div id="glossary-list">
+          <p class="loading">Loading...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initLayout } from './js/layout.js';
+    import { supabase } from './js/supabase.js';
+
+    await initLayout('glossary.html');
+
+    const listEl = document.getElementById('glossary-list');
+    const searchEl = document.getElementById('search');
+
+    let allTerms = [];
+
+    async function loadGlossary() {
+      const { data, error } = await supabase
+        .from('glossary')
+        .select('*')
+        .order('term', { ascending: true });
+
+      if (error) {
+        listEl.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        return;
+      }
+
+      allTerms = data || [];
+      renderTerms(allTerms);
+
+      // If URL has #term, scroll to it
+      if (window.location.hash) {
+        const target = document.querySelector(window.location.hash);
+        if (target) {
+          setTimeout(() => {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            target.classList.add('glossary-highlight');
+            setTimeout(() => target.classList.remove('glossary-highlight'), 2000);
+          }, 200);
+        }
+      }
+    }
+
+    function renderTerms(terms) {
+      if (!terms.length) {
+        listEl.innerHTML = '<p class="empty">No terms yet.</p>';
+        return;
+      }
+
+      listEl.innerHTML = terms.map((t) => `
+        <div class="glossary-entry" id="term-${t.term.replace(/\s+/g, '-').toLowerCase()}">
+          <div class="glossary-entry-term">${escapeHtml(t.term)}</div>
+          <div class="glossary-entry-def">${escapeHtml(t.definition)}</div>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    searchEl.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      const filtered = allTerms.filter((t) =>
+        t.term.toLowerCase().includes(q) ||
+        t.definition.toLowerCase().includes(q)
+      );
+      renderTerms(filtered);
+    });
+
+    loadGlossary();
+  </script>
+</body>
+</html>

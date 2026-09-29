@@ -64,7 +64,8 @@ export async function highlightTerms(container) {
   container.querySelectorAll('.glossary-term').forEach((el) => {
     el.addEventListener('click', (e) => {
       e.preventDefault();
-      openGlossaryPopup(el.dataset.term, e.clientX, e.clientY);
+      const slug = el.dataset.term.toLowerCase().replace(/\s+/g, '-');
+      window.open(`glossary.html#term-${slug}`, '_blank');
     });
   });
 }
