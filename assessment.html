@@ -15,19 +15,91 @@
 
       <div class="dashboard-content">
         <h1 class="page-title">Assessment</h1>
-        <p class="page-sub">Reflections from you and your classmates across all modules.</p>
+        <p class="page-sub">Choose an activity to complete. Submissions and reflections across all modules.</p>
 
-        <div class="welcome-card" style="margin-bottom:2rem;">
-          <h2>Reflection-Based Assessment</h2>
-          <p>Instead of quizzes, DocuLearn uses reflections to check understanding. Read your classmates' reflections, then add your own from any module page.</p>
-          <div class="welcome-actions">
-            <a href="index.html">Go to Modules</a>
+        <!-- Activity Type Selector -->
+        <div class="activity-tabs" id="activity-tabs">
+          <button class="activity-tab active" data-tab="video">One-Minute Video</button>
+          <button class="activity-tab" data-tab="reflection">Reflection Essay</button>
+          <button class="activity-tab disabled" data-tab="poster" disabled>Create a Poster <span class="soon-inline">Soon</span></button>
+          <button class="activity-tab disabled" data-tab="think" disabled>Think-Pair-Share <span class="soon-inline">Soon</span></button>
+        </div>
+
+        <!-- Video Activity Panel -->
+        <section class="activity-panel active" id="panel-video">
+          <div class="post-form-card">
+            <h3>Submit a One-Minute Video</h3>
+            <p style="color:#6b7280; font-size:0.9rem; margin-bottom:1rem;">
+              Record a one-minute video answering the current issue. Upload the video, then share your thoughts. Other students and teachers can comment on your submission.
+            </p>
+
+            <form id="video-form">
+              <div class="post-form-row">
+                <select id="video-topic" required>
+                  <option value="">— Select a module —</option>
+                </select>
+                <input type="text" id="video-title" placeholder="Video title (e.g., 'Polusyon sa Guimba')" required maxlength="100" />
+              </div>
+
+              <div class="field">
+                <label style="font-size:0.85rem; color:#14532d; font-weight:600;">Upload Video</label>
+                <div class="upload-zone" id="video-upload-zone">
+                  <input type="file" id="video-input" accept="video/*" hidden />
+                  <div class="upload-inner" id="video-upload-inner">
+                    <div class="upload-icon">▶</div>
+                    <p class="upload-text">Click to choose a video</p>
+                    <p class="upload-hint">MP4, WebM, or MOV — max 50 MB</p>
+                  </div>
+                  <video id="video-preview" class="upload-preview" style="display:none;" controls></video>
+                </div>
+                <input type="hidden" id="video-url-hidden" />
+                <small id="video-upload-status" class="upload-status"></small>
+              </div>
+
+              <div class="field">
+                <label style="font-size:0.85rem; color:#14532d; font-weight:600;">Your thoughts (optional)</label>
+                <textarea id="video-description" placeholder="Bakit ito ang napili mong isyu? Ano ang iyong pananaw?" maxlength="500"></textarea>
+              </div>
+
+              <button type="submit" class="btn">Submit Video</button>
+              <p class="form-msg" id="video-msg"></p>
+            </form>
           </div>
-        </div>
 
-        <div id="assessments">
-          <p class="loading">Loading...</p>
-        </div>
+          <h2 class="page-title" style="font-size:1.15rem; margin-top:2rem;">Submitted Videos</h2>
+          <div id="video-list">
+            <p class="loading">Loading...</p>
+          </div>
+        </section>
+
+        <!-- Reflection Panel (reuses existing reflections from all topics) -->
+        <section class="activity-panel" id="panel-reflection">
+          <div class="post-form-card">
+            <h3>Write a Reflection Essay</h3>
+            <p style="color:#6b7280; font-size:0.9rem; margin-bottom:1rem;">
+              Share your reflection on a module topic. Your submission appears in the forum and here.
+            </p>
+
+            <form id="reflection-form">
+              <div class="post-form-row">
+                <select id="reflection-topic" required>
+                  <option value="">— Select a module —</option>
+                </select>
+              </div>
+              <textarea id="reflection-content" placeholder="Isulat ang iyong repleksyon..." required maxlength="1000"></textarea>
+              <div class="post-form-footer">
+                <span class="post-form-hint">Minimum 50 words for full credit.</span>
+                <button type="submit" class="btn">Post Reflection</button>
+              </div>
+              <p class="form-msg" id="reflection-msg"></p>
+            </form>
+          </div>
+
+          <h2 class="page-title" style="font-size:1.15rem; margin-top:2rem;">Submitted Reflections</h2>
+          <div id="reflection-list">
+            <p class="loading">Loading...</p>
+          </div>
+        </section>
       </div>
     </div>
   </div>
@@ -39,15 +111,150 @@
     const user = await initLayout('assessment.html');
     if (!user) throw new Error('Not logged in');
 
-    const el = document.getElementById('assessments');
+    const userName = user.user_metadata.name || 'Student';
 
-    async function loadReflections() {
+    // ---------- Tabs ----------
+    document.querySelectorAll('.activity-tab:not(.disabled)').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.activity-tab').forEach((t) => t.classList.remove('active'));
+        document.querySelectorAll('.activity-panel').forEach((p) => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    // ---------- Load topics into dropdowns ----------
+    async function loadTopics() {
+      const { data } = await supabase.from('topics').select('id, title').order('title');
+      if (!data) return;
+
+      const options = '<option value="">— Select a module —</option>' +
+        data.map((t) => `<option value="${t.id}">${t.title}</option>`).join('');
+
+      document.getElementById('video-topic').innerHTML = options;
+      document.getElementById('reflection-topic').innerHTML = options;
+    }
+    loadTopics();
+
+    // ---------- Video Upload ----------
+    const videoZone = document.getElementById('video-upload-zone');
+    const videoInput = document.getElementById('video-input');
+    const videoPreview = document.getElementById('video-preview');
+    const videoUrlHidden = document.getElementById('video-url-hidden');
+    const videoUploadStatus = document.getElementById('video-upload-status');
+    const videoUploadInner = document.getElementById('video-upload-inner');
+
+    videoZone.addEventListener('click', () => videoInput.click());
+
+    videoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) handleVideoUpload(file);
+    });
+
+    async function handleVideoUpload(file) {
+      if (!file.type.startsWith('video/')) {
+        setVideoStatus('Not a valid video file.', 'error');
+        return;
+      }
+      if (file.size > 50 * 1024 * 1024) {
+        setVideoStatus('File exceeds 50 MB.', 'error');
+        return;
+      }
+
+      setVideoStatus('Uploading video...', 'uploading');
+
+      const ext = file.name.split('.').pop();
+      const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+      const { data, error } = await supabase.storage
+        .from('materials')
+        .upload(`videos/${filename}`, file, { cacheControl: '3600', upsert: false });
+
+      if (error) {
+        setVideoStatus(`Upload error: ${error.message}`, 'error');
+        return;
+      }
+
+      const { data: publicData } = supabase.storage
+        .from('materials')
+        .getPublicUrl(data.path);
+
+      videoUrlHidden.value = publicData.publicUrl;
+
+      videoPreview.src = publicData.publicUrl;
+      videoPreview.style.display = 'block';
+      videoZone.classList.add('has-image');
+      videoUploadInner.style.display = 'none';
+
+      setVideoStatus('Uploaded. Ready to submit.', 'success');
+    }
+
+    function setVideoStatus(msg, type = '') {
+      videoUploadStatus.textContent = msg;
+      videoUploadStatus.className = 'upload-status ' + type;
+    }
+
+    function resetVideoUpload() {
+      videoUrlHidden.value = '';
+      videoPreview.src = '';
+      videoPreview.style.display = 'none';
+      videoZone.classList.remove('has-image');
+      videoUploadInner.style.display = 'flex';
+      videoInput.value = '';
+      setVideoStatus('');
+    }
+
+    // ---------- Video Submit ----------
+    document.getElementById('video-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('video-msg');
+
+      const topicId = document.getElementById('video-topic').value;
+      const title = document.getElementById('video-title').value.trim();
+      const description = document.getElementById('video-description').value.trim();
+
+      if (!topicId || !title || !videoUrlHidden.value) {
+        msg.textContent = 'Please fill in all required fields and upload a video.';
+        msg.className = 'form-msg error';
+        return;
+      }
+
+      msg.textContent = 'Submitting...';
+      msg.className = 'form-msg';
+
+      const { error } = await supabase.from('posts').insert({
+        topic_id: topicId,
+        user_id: user.id,
+        name: userName,
+        content: description || title,
+        type: 'discussion',
+        activity_type: 'video',
+        video_url: videoUrlHidden.value,
+        parent_id: null,
+      });
+
+      if (error) {
+        msg.textContent = `Error: ${error.message}`;
+        msg.className = 'form-msg error';
+        return;
+      }
+
+      msg.textContent = 'Video submitted!';
+      msg.className = 'form-msg success';
+      document.getElementById('video-form').reset();
+      resetVideoUpload();
+      loadVideos();
+    });
+
+    // ---------- Load Submitted Videos ----------
+    async function loadVideos() {
+      const el = document.getElementById('video-list');
       const { data, error } = await supabase
         .from('posts')
-        .select('*, topics(title, slug)')
-        .eq('type', 'reflection')
+        .select('*, topics(title)')
+        .eq('activity_type', 'video')
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(30);
 
       if (error) {
         el.innerHTML = `<p class="error">Error: ${error.message}</p>`;
@@ -55,20 +262,215 @@
       }
 
       if (!data.length) {
-        el.innerHTML = '<p class="empty">No reflections yet. Be the first to share one!</p>';
+        el.innerHTML = '<p class="empty">No videos submitted yet. Be the first!</p>';
         return;
       }
 
-      el.innerHTML = data.map((p) => `
-        <div class="post" style="margin-bottom:1rem;">
-          <div class="post-header">
-            <strong>${escapeHtml(p.name || 'Anonymous')}</strong>
-            <span class="badge">Reflection</span>
-            ${p.topics ? `<span style="color:#6b7280; font-size:0.85rem;">· <a href="topic.html?slug=${p.topics.slug}" style="color:#14532d;">${p.topics.title}</a></span>` : ''}
+      el.innerHTML = data.map((v) => `
+        <div class="video-submission">
+          <div class="video-submission-header">
+            <strong>${escapeHtml(v.name)}</strong>
+            <span class="badge">${v.activity_type}</span>
+            ${v.topics ? `<span style="color:#6b7280; font-size:0.85rem;">· ${escapeHtml(v.topics.title)}</span>` : ''}
+            <span style="color:#9ca3af; font-size:0.82rem; margin-left:auto;">${formatDate(v.created_at)}</span>
           </div>
-          <p>${escapeHtml(p.content)}</p>
+          ${v.video_url ? `<video src="${v.video_url}" controls preload="metadata" class="submitted-video"></video>` : ''}
+          ${v.content ? `<p style="margin-top:0.75rem; color:#374151; font-size:0.92rem;">${escapeHtml(v.content)}</p>` : ''}
+          <button class="reply-toggle" data-parent="${v.id}">Show comments</button>
+          <div class="replies" data-comments-for="${v.id}" style="display:none;"></div>
+          <div class="reply-form-wrap" data-form-for="${v.id}" style="display:none;">
+            <textarea class="reply-content" placeholder="Write a comment..." maxlength="500"></textarea>
+            <div class="reply-actions">
+              <button class="btn-secondary reply-cancel">Cancel</button>
+              <button class="btn reply-submit" data-parent="${v.id}">Comment</button>
+            </div>
+          </div>
         </div>
       `).join('');
+
+      attachVideoHandlers();
+    }
+
+    function attachVideoHandlers() {
+      document.querySelectorAll('.reply-toggle').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const parentId = btn.dataset.parent;
+          const commentsEl = document.querySelector(`[data-comments-for="${parentId}"]`);
+          const formEl = document.querySelector(`[data-form-for="${parentId}"]`);
+
+          if (commentsEl.style.display === 'none') {
+            await loadComments(parentId, commentsEl);
+            commentsEl.style.display = 'block';
+            formEl.style.display = 'block';
+            btn.textContent = 'Hide comments';
+          } else {
+            commentsEl.style.display = 'none';
+            formEl.style.display = 'none';
+            btn.textContent = 'Show comments';
+          }
+        });
+      });
+
+      document.querySelectorAll('.reply-cancel').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const wrap = btn.closest('.reply-form-wrap');
+          wrap.querySelector('.reply-content').value = '';
+          wrap.style.display = 'none';
+        });
+      });
+
+      document.querySelectorAll('.reply-submit').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const wrap = btn.closest('.reply-form-wrap');
+          const content = wrap.querySelector('.reply-content').value.trim();
+
+          if (!content) {
+            alert('Comment is required.');
+            return;
+          }
+
+          const parentId = btn.dataset.parent;
+
+          // Find the parent's topic_id
+          const { data: parentPost } = await supabase
+            .from('posts')
+            .select('topic_id')
+            .eq('id', parentId)
+            .maybeSingle();
+
+          btn.disabled = true;
+          btn.textContent = 'Posting...';
+
+          const { error } = await supabase.from('posts').insert({
+            topic_id: parentPost?.topic_id || null,
+            parent_id: parentId,
+            user_id: user.id,
+            name: userName,
+            content,
+            type: 'discussion',
+          });
+
+          if (error) {
+            alert('Error: ' + error.message);
+            btn.disabled = false;
+            btn.textContent = 'Comment';
+            return;
+          }
+
+          // Reload comments
+          const commentsEl = document.querySelector(`[data-comments-for="${parentId}"]`);
+          await loadComments(parentId, commentsEl);
+          wrap.querySelector('.reply-content').value = '';
+          btn.disabled = false;
+          btn.textContent = 'Comment';
+        });
+      });
+    }
+
+    async function loadComments(parentId, el) {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('parent_id', parentId)
+        .order('created_at', { ascending: true });
+
+      if (error || !data.length) {
+        el.innerHTML = '<p style="color:#9ca3af; font-size:0.85rem; padding:0.5rem 0;">No comments yet.</p>';
+        return;
+      }
+
+      el.innerHTML = data.map((c) => `
+        <div class="reply">
+          <div class="reply-header">
+            <strong>${escapeHtml(c.name)}</strong>
+            <span style="color:#9ca3af; font-size:0.78rem;">${formatDate(c.created_at)}</span>
+          </div>
+          <p>${escapeHtml(c.content)}</p>
+        </div>
+      `).join('');
+    }
+
+    // ---------- Reflection Submit ----------
+    document.getElementById('reflection-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('reflection-msg');
+
+      const topicId = document.getElementById('reflection-topic').value;
+      const content = document.getElementById('reflection-content').value.trim();
+
+      if (!topicId || !content) {
+        msg.textContent = 'Please select a module and write your reflection.';
+        msg.className = 'form-msg error';
+        return;
+      }
+
+      msg.textContent = 'Posting...';
+      msg.className = 'form-msg';
+
+      const { error } = await supabase.from('posts').insert({
+        topic_id: topicId,
+        user_id: user.id,
+        name: userName,
+        content,
+        type: 'reflection',
+        activity_type: 'reflection',
+        parent_id: null,
+      });
+
+      if (error) {
+        msg.textContent = `Error: ${error.message}`;
+        msg.className = 'form-msg error';
+        return;
+      }
+
+      msg.textContent = 'Reflection posted!';
+      msg.className = 'form-msg success';
+      document.getElementById('reflection-form').reset();
+      loadReflections();
+    });
+
+    // ---------- Load Submitted Reflections ----------
+    async function loadReflections() {
+      const el = document.getElementById('reflection-list');
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*, topics(title, slug)')
+        .eq('activity_type', 'reflection')
+        .order('created_at', { ascending: false })
+        .limit(30);
+
+      if (error) {
+        el.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        return;
+      }
+
+      if (!data.length) {
+        el.innerHTML = '<p class="empty">No reflections yet. Be the first!</p>';
+        return;
+      }
+
+      el.innerHTML = data.map((r) => `
+        <div class="post" style="margin-bottom:1rem;">
+          <div class="post-header">
+            <strong>${escapeHtml(r.name)}</strong>
+            <span class="badge">Reflection</span>
+            ${r.topics ? `<span style="color:#6b7280; font-size:0.85rem;">· <a href="topic.html?slug=${r.topics.slug}" style="color:#14532d;">${escapeHtml(r.topics.title)}</a></span>` : ''}
+          </div>
+          <p>${escapeHtml(r.content)}</p>
+        </div>
+      `).join('');
+    }
+
+    // ---------- Helpers ----------
+    function formatDate(iso) {
+      const d = new Date(iso);
+      const now = new Date();
+      const diffHrs = (now - d) / (1000 * 60 * 60);
+      if (diffHrs < 1) return 'Just now';
+      if (diffHrs < 24) return `${Math.floor(diffHrs)}h ago`;
+      const diffDays = Math.floor(diffHrs / 24);
+      if (diffDays < 7) return `${diffDays}d ago`;
+      return d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
     }
 
     function escapeHtml(str) {
@@ -80,6 +482,8 @@
         .replace(/'/g, '&#39;');
     }
 
+    // ---------- Initial load ----------
+    loadVideos();
     loadReflections();
   </script>
 </body>

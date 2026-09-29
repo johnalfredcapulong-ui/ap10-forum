@@ -39,28 +39,28 @@
 
               <div class="activities-grid">
                 <a href="assessment.html" class="activity-card">
-                  <div class="activity-icon">✎</div>
+                  <div class="activity-icon">&#9654;</div>
+                  <h3>One-Minute Video</h3>
+                  <p>Record your take on a current issue.</p>
+                  <span class="activity-status active">Active</span>
+                </a>
+
+                <a href="assessment.html" class="activity-card">
+                  <div class="activity-icon">&#9998;</div>
                   <h3>Reflection Essay</h3>
                   <p>Share your thoughts on current issues.</p>
                   <span class="activity-status active">Active</span>
                 </a>
 
                 <div class="activity-card disabled">
-                  <div class="activity-icon">◫</div>
+                  <div class="activity-icon">&#9707;</div>
                   <h3>Create a Poster</h3>
                   <p>Design an infographic on a module topic.</p>
                   <span class="activity-status soon">Coming soon</span>
                 </div>
 
                 <div class="activity-card disabled">
-                  <div class="activity-icon">▶</div>
-                  <h3>One-Minute Video</h3>
-                  <p>Record your opinion on a current issue.</p>
-                  <span class="activity-status soon">Coming soon</span>
-                </div>
-
-                <div class="activity-card disabled">
-                  <div class="activity-icon">↔</div>
+                  <div class="activity-icon">&#8596;</div>
                   <h3>Think-Pair-Share</h3>
                   <p>Discuss with a classmate.</p>
                   <span class="activity-status soon">Coming soon</span>
@@ -76,14 +76,14 @@
                 <div class="quiz-item disabled">
                   <div>
                     <strong>Aralin 1: Mga Hamon at Kontemporanyong Isyu</strong>
-                    <p>10 items · Multiple choice</p>
+                    <p>10 items &middot; Multiple choice</p>
                   </div>
                   <span class="activity-status soon">Coming soon</span>
                 </div>
                 <div class="quiz-item disabled">
                   <div>
                     <strong>Aralin 2: Konteksto ng Suliraning Pangkapaligiran</strong>
-                    <p>10 items · Multiple choice</p>
+                    <p>10 items &middot; Multiple choice</p>
                   </div>
                   <span class="activity-status soon">Coming soon</span>
                 </div>
@@ -146,13 +146,12 @@
         <span class="module-card-label">Module ${i + 1}</span>
         <h3>${t.title}</h3>
         <p>${t.description || ''}</p>
-        <span class="module-card-cta">Explore →</span>
+        <span class="module-card-cta">Explore &rarr;</span>
       </a>
     `).join('');
   }
 
   async function loadFeaturedVideo() {
-    // Pick the most recent cached video
     const { data, error } = await supabase
       .from('yt_cache')
       .select('results, created_at')
@@ -171,7 +170,7 @@
       <div class="video-card" data-video-id="${video.videoId}" data-title="${video.title.replace(/"/g, '&quot;')}">
         <div class="video-thumb">
           <img src="${video.thumbnail}" alt="${video.title}" loading="lazy" />
-          <div class="play-button">▶</div>
+          <div class="play-button">&#9654;</div>
         </div>
         <h3 style="font-size:0.95rem; padding: 0.75rem 1rem 0.25rem; color:#14532d; line-height:1.35;">${video.title}</h3>
         <p style="font-size:0.82rem; color:#6b7280; padding: 0 1rem 0.85rem;">${video.channel}</p>
