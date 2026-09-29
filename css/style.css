@@ -1888,3 +1888,21 @@ body {
   background: #000;
   display: block;
 }
+
+.shared-textarea {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 90px;
+  line-height: 1.5;
+}
+
+.shared-textarea:focus {
+  outline: none;
+  border-color: #14532d;
+  box-shadow: 0 0 0 3px rgba(20, 83, 45, 0.1);
+}
