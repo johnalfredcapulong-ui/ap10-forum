@@ -190,6 +190,8 @@ materialForm.addEventListener('submit', async (e) => {
   const payload = {
     topic_id: form.get('topic_id'),
     type,
+    section: form.get('section') || 'info',
+    sort_order: parseInt(form.get('sort_order')) || 0,
     url: type === 'image' ? urlHidden.value : null,
     content: type === 'text' ? form.get('content').trim() : null,
     caption: form.get('caption').trim(),

@@ -62,17 +62,18 @@
                   </select>
                 </div>
                 <div class="field">
-                  <label>Type</label>
-                  <div class="type-toggle">
-                    <label class="type-option">
-                      <input type="radio" name="type" value="image" checked />
-                      <span>Image</span>
-                    </label>
-                    <label class="type-option">
-                      <input type="radio" name="type" value="text" />
-                      <span>Text / Data</span>
-                    </label>
-                  </div>
+                  <label>Section</label>
+                  <select name="section" id="section-select" required>
+                    <option value="info">Info (intro, background text)</option>
+                    <option value="images">Sample Images</option>
+                    <option value="discussion">Discussion / Additional Data</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label>Order (optional)</label>
+                  <input type="number" name="sort_order" value="0" min="0" />
+                  <small>Lower numbers appear first. Leave 0 for default order.</small>
                 </div>
                 <div class="field" id="field-url">
                   <label>Image</label>

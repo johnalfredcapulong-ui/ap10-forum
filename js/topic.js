@@ -53,12 +53,12 @@ async function loadTopic() {
   setupRealtime();
 }
 
-// ---------- Materials ----------
 async function loadMaterials() {
   const { data, error } = await supabase
     .from('materials')
     .select('*')
     .eq('topic_id', topic.id)
+    .order('sort_order', { ascending: true })
     .order('created_at', { ascending: true });
 
   if (error) {
@@ -71,23 +71,88 @@ async function loadMaterials() {
     return;
   }
 
-  materialsEl.innerHTML = data.map((m) => {
-    if (m.type === 'image') {
-      return `
-        <figure class="material-card">
-          <img src="${m.url}" alt="${m.caption || ''}" loading="lazy" />
-          <figcaption>${m.caption || ''}</figcaption>
-        </figure>
-      `;
-    }
-    return `
-      <div class="material-card material-text">
-        ${m.caption ? `<h3>${m.caption}</h3>` : ''}
-        <p>${m.content || ''}</p>
+  // Split by section
+  const infoItems = data.filter((m) => m.section === 'info' || (!m.section && m.type === 'text'));
+  const imageItems = data.filter((m) => m.section === 'images' || (!m.section && m.type === 'image'));
+  const discussionItems = data.filter((m) => m.section === 'discussion');
+
+  let html = '';
+
+  // Section 1: Info
+  if (infoItems.length) {
+    html += `
+      <div class="materials-section">
+        <h3 class="materials-section-title">Overview</h3>
+        <div class="info-blocks">
+          ${infoItems.map((m) => `
+            <div class="info-block">
+              ${m.caption ? `<h4>${escapeHtml(m.caption)}</h4>` : ''}
+              <p>${escapeHtml(m.content || '')}</p>
+            </div>
+          `).join('')}
+        </div>
       </div>
     `;
-  }).join('');
+  }
+
+  // Section 2: Sample Images
+  if (imageItems.length) {
+    html += `
+      <div class="materials-section">
+        <h3 class="materials-section-title">Sample Images</h3>
+        <div class="materials-grid">
+          ${imageItems.map((m) => `
+            <figure class="material-card">
+              <img src="${m.url}" alt="${escapeHtml(m.caption || '')}" loading="lazy" />
+              <figcaption>${escapeHtml(m.caption || '')}</figcaption>
+            </figure>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // Section 3: Additional Discussion / Data
+  if (discussionItems.length) {
+    html += `
+      <div class="materials-section">
+        <h3 class="materials-section-title">Additional Data & Discussion</h3>
+        <div class="info-blocks">
+          ${discussionItems.map((m) => {
+            if (m.type === 'image') {
+              return `
+                <figure class="material-card">
+                  <img src="${m.url}" alt="${escapeHtml(m.caption || '')}" loading="lazy" />
+                  <figcaption>${escapeHtml(m.caption || '')}</figcaption>
+                </figure>
+              `;
+            }
+            return `
+              <div class="info-block">
+                ${m.caption ? `<h4>${escapeHtml(m.caption)}</h4>` : ''}
+                <p>${escapeHtml(m.content || '')}</p>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  materialsEl.innerHTML = html;
+
+  // Apply glossary highlighting to text
   highlightTerms(materialsEl);
+}
+
+// Helper — if you don't have escapeHtml in this file yet
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 // ---------- Videos ----------
