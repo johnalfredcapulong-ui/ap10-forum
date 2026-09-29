@@ -145,15 +145,7 @@ async function loadMaterials() {
   highlightTerms(materialsEl);
 }
 
-// Helper — if you don't have escapeHtml in this file yet
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
+
 
 // ---------- Videos ----------
 async function loadVideos() {
