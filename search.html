@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search — DocuLearn</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar"></aside>
+    <div class="dashboard-main">
+      <div class="topbar"></div>
+      <div class="dashboard-content">
+        <h1 class="page-title">Search learning content</h1>
+        <p class="page-sub">Find a topic, lesson, documentary, or activity.</p>
+
+        <div class="search-bar" style="margin-bottom:1.5rem;">
+          <input type="text" id="search" placeholder="Search modules, topics, or keywords..." />
+        </div>
+
+        <h2 class="section-title" style="font-size:1.05rem;">Modules</h2>
+        <section id="modules" class="module-grid"></section>
+
+        <h2 class="section-title" style="font-size:1.05rem; margin-top:2rem;">Glossary</h2>
+        <section id="glossary"></section>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initLayout } from './js/layout.js';
+    import { supabase } from './js/supabase.js';
+
+    const user = await initLayout('search.html');
+    if (!user) throw new Error('Not logged in');
+
+    const searchEl = document.getElementById('search');
+    const modulesEl = document.getElementById('modules');
+    const glossaryEl = document.getElementById('glossary');
+
+    const params = new URLSearchParams(window.location.search);
+    const initialQ = params.get('q') || '';
+    searchEl.value = initialQ;
+
+    async function performSearch(q) {
+      const query = q.toLowerCase().trim();
+      if (!query) {
+        modulesEl.innerHTML = '';
+        glossaryEl.innerHTML = '';
+        return;
+      }
+
+      const [{ data: modules }, { data: glossary }] = await Promise.all([
+        supabase.from('topics').select('*').or(`title.ilike.%${query}%,description.ilike.%${query}%`),
+        supabase.from('glossary').select('*').or(`term.ilike.%${query}%,definition.ilike.%${query}%`),
+      ]);
+
+      modulesEl.innerHTML = (modules || []).length
+        ? modules.map((m) => `
+            <a class="module-card" href="topic.html?slug=${m.slug}">
+              <div class="module-card-cover">
+                ${m.cover_url ? `<img src="${m.cover_url}" alt="${m.title}" />` : ''}
+              </div>
+              <div class="module-card-body">
+                ${m.category ? `<span class="module-card-tag">${m.category}</span>` : ''}
+                <h3>${m.title}</h3>
+                <p>${m.description || ''}</p>
+              </div>
+            </a>
+          `).join('')
+        : '<p class="empty">No modules found.</p>';
+
+      glossaryEl.innerHTML = (glossary || []).length
+        ? glossary.map((g) => `
+            <div class="glossary-entry" style="margin-bottom:0.5rem;">
+              <div class="glossary-entry-term">${g.term}</div>
+              <div class="glossary-entry-def">${g.definition}</div>
+            </div>
+          `).join('')
+        : '<p class="empty">No terms found.</p>';
+    }
+
+    let timer;
+    searchEl.addEventListener('input', (e) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => performSearch(e.target.value), 300);
+    });
+
+    if (initialQ) performSearch(initialQ);
+  </script>
+</body>
+</html>
