@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin — AP10 Localized Learning</title>
+  <title>Admin — DocuLearn</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -15,105 +15,209 @@
 
       <div class="dashboard-content">
         <h1 class="page-title">Admin Panel</h1>
-        <p class="page-sub">Manage topics and materials.</p>
+        <p class="page-sub">Manage modules, materials, and assessments.</p>
 
-        <div id="admin-tools">
-          <div class="tabs">
-            <button class="tab active" data-tab="topic">New Topic</button>
-            <button class="tab" data-tab="material">New Material</button>
-            <button class="tab" data-tab="list">List</button>
-          </div>
-
-          <!-- Panel: Topic -->
-          <section class="panel active" id="panel-topic">
-            <div class="panel-card">
-              <h2>Add Topic</h2>
-              <p class="panel-sub">Create a new module for the AP10 curriculum.</p>
-              <form id="topic-form" class="admin-form">
-                <div class="field">
-                  <label>Title</label>
-                  <input type="text" name="title" required placeholder="Example: Air Pollution" />
-                </div>
-                <div class="field">
-                  <label>Slug</label>
-                  <input type="text" name="slug" required placeholder="air-pollution" pattern="[a-z0-9-]+" />
-                  <small>URL-friendly, lowercase, no spaces.</small>
-                </div>
-                <div class="field">
-                  <label>Description</label>
-                  <textarea name="description" rows="3" placeholder="Short description of the topic"></textarea>
-                </div>
-                <button type="submit" class="btn">Save Topic</button>
-                <p class="form-msg" id="topic-msg"></p>
-              </form>
-            </div>
-          </section>
-
-          <!-- Panel: Material -->
-          <section class="panel" id="panel-material">
-            <div class="panel-card">
-              <h2>Add Material</h2>
-              <p class="panel-sub">Add an image, data, or text for a topic.</p>
-              <form id="material-form" class="admin-form">
-                <div class="field">
-                  <label>Topic</label>
-                  <select name="topic_id" id="topic-select" required>
-                    <option value="">— Select a topic —</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label>Section</label>
-                  <select name="section" id="section-select" required>
-                    <option value="info">Info (intro, background text)</option>
-                    <option value="images">Sample Images</option>
-                    <option value="discussion">Discussion / Additional Data</option>
-                  </select>
-                </div>
-
-                <div class="field">
-                  <label>Order (optional)</label>
-                  <input type="number" name="sort_order" value="0" min="0" />
-                  <small>Lower numbers appear first. Leave 0 for default order.</small>
-                </div>
-                <div class="field" id="field-url">
-                  <label>Image</label>
-                  <div class="upload-zone" id="upload-zone">
-                    <input type="file" id="image-input" accept="image/*" hidden />
-                    <div class="upload-inner">
-                      <div class="upload-icon">&#128247;</div>
-                      <p class="upload-text">Click to choose an image</p>
-                      <p class="upload-hint">JPG, PNG, or WebP — max 5 MB</p>
-                    </div>
-                    <img id="upload-preview" class="upload-preview" style="display:none;" />
-                  </div>
-                  <input type="hidden" name="url" id="url-hidden" />
-                  <small id="upload-status" class="upload-status"></small>
-                </div>
-                <div class="field" id="field-content" style="display:none;">
-                  <label>Content</label>
-                  <textarea name="content" rows="4" placeholder="Text or data content..."></textarea>
-                </div>
-                <div class="field">
-                  <label>Caption</label>
-                  <input type="text" name="caption" placeholder="Short caption or title" />
-                </div>
-                <button type="submit" class="btn">Save Material</button>
-                <p class="form-msg" id="material-msg"></p>
-              </form>
-            </div>
-          </section>
-
-          <!-- Panel: List -->
-          <section class="panel" id="panel-list">
-            <div class="panel-card">
-              <h2>Recent Materials</h2>
-              <p class="panel-sub">Latest 20 materials. You can delete any mistakes.</p>
-              <div id="recent-materials">
-                <p class="loading">Loading...</p>
-              </div>
-            </div>
-          </section>
+        <div class="tabs">
+          <button class="tab active" data-tab="module">Modules</button>
+          <button class="tab" data-tab="material">Materials</button>
+          <button class="tab" data-tab="quiz">Quizzes</button>
+          <button class="tab" data-tab="glossary">Glossary</button>
         </div>
+
+        <!-- ==================== MODULE PANEL ==================== -->
+        <section class="panel active" id="panel-module">
+          <div class="panel-card">
+            <h2>Add Module</h2>
+            <p class="panel-sub">Create a new module with cover image and category.</p>
+            <form id="module-form" class="admin-form">
+              <div class="field">
+                <label>Title</label>
+                <input type="text" name="title" required placeholder="Example: Polusyon sa Lupa" />
+              </div>
+              <div class="field">
+                <label>Slug</label>
+                <input type="text" name="slug" required placeholder="polusyon-sa-lupa" pattern="[a-z0-9-]+" />
+                <small>URL-friendly, lowercase, no spaces.</small>
+              </div>
+              <div class="field">
+                <label>Description</label>
+                <textarea name="description" rows="3" placeholder="Short description"></textarea>
+              </div>
+              <div class="field">
+                <label>Category</label>
+                <input type="text" name="category" placeholder="Environment / Society / Civics" />
+              </div>
+              <div class="field">
+                <label>Cover Image</label>
+                <div class="upload-zone" id="module-cover-zone">
+                  <input type="file" id="module-cover-input" accept="image/*" hidden />
+                  <div class="upload-inner" id="module-cover-inner">
+                    <div class="upload-icon">▧</div>
+                    <p class="upload-text">Click to choose a cover image</p>
+                    <p class="upload-hint">JPG, PNG, or WebP — max 5 MB</p>
+                  </div>
+                  <img id="module-cover-preview" class="upload-preview" style="display:none;" />
+                </div>
+                <input type="hidden" name="cover_url" id="module-cover-url" />
+                <small id="module-cover-status" class="upload-status"></small>
+              </div>
+              <div class="field">
+                <label>Order</label>
+                <input type="number" name="order_index" value="0" min="0" />
+                <small>Lower numbers appear first.</small>
+              </div>
+              <button type="submit" class="btn">Save Module</button>
+              <p class="form-msg" id="module-msg"></p>
+            </form>
+          </div>
+        </section>
+
+        <!-- ==================== MATERIAL PANEL ==================== -->
+        <section class="panel" id="panel-material">
+          <div class="panel-card">
+            <h2>Add Material</h2>
+            <p class="panel-sub">Add a reading, documentary, or image to a module.</p>
+            <form id="material-form" class="admin-form">
+              <div class="field">
+                <label>Module</label>
+                <select name="topic_id" id="material-topic-select" required>
+                  <option value="">— Select a module —</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Kind</label>
+                <select name="kind" id="material-kind" required>
+                  <option value="reading">Reading</option>
+                  <option value="documentary">Documentary</option>
+                  <option value="activity">Activity</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Section</label>
+                <select name="section" required>
+                  <option value="info">Info (intro, background)</option>
+                  <option value="images">Sample Images</option>
+                  <option value="discussion">Additional Data</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Type</label>
+                <div class="type-toggle">
+                  <label class="type-option">
+                    <input type="radio" name="type" value="image" checked />
+                    <span>Image</span>
+                  </label>
+                  <label class="type-option">
+                    <input type="radio" name="type" value="text" />
+                    <span>Text / Data</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Title</label>
+                <input type="text" name="title" placeholder="Title" />
+              </div>
+
+              <div class="field" id="material-url-field">
+                <label>Image</label>
+                <div class="upload-zone" id="material-upload-zone">
+                  <input type="file" id="material-image-input" accept="image/*" hidden />
+                  <div class="upload-inner" id="material-upload-inner">
+                    <div class="upload-icon">▧</div>
+                    <p class="upload-text">Click to choose an image</p>
+                    <p class="upload-hint">JPG, PNG, or WebP — max 5 MB</p>
+                  </div>
+                  <img id="material-upload-preview" class="upload-preview" style="display:none;" />
+                </div>
+                <input type="hidden" name="url" id="material-url-hidden" />
+                <small id="material-upload-status" class="upload-status"></small>
+              </div>
+
+              <div class="field" id="material-content-field" style="display:none;">
+                <label>Content</label>
+                <textarea name="content" rows="6" placeholder="Text content..."></textarea>
+              </div>
+
+              <div class="field">
+                <label>Caption</label>
+                <input type="text" name="caption" placeholder="Short caption or title" />
+              </div>
+
+              <div class="field">
+                <label>Order</label>
+                <input type="number" name="order_index" value="0" min="0" />
+              </div>
+
+              <button type="submit" class="btn">Save Material</button>
+              <p class="form-msg" id="material-msg"></p>
+            </form>
+          </div>
+        </section>
+
+        <!-- ==================== QUIZ PANEL ==================== -->
+        <section class="panel" id="panel-quiz">
+          <div class="panel-card">
+            <h2>Add Quiz</h2>
+            <p class="panel-sub">Create a multiple-choice assessment for a module.</p>
+            <form id="quiz-form" class="admin-form">
+              <div class="field">
+                <label>Module</label>
+                <select name="topic_id" id="quiz-topic-select" required>
+                  <option value="">— Select a module —</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Quiz Title</label>
+                <input type="text" name="title" required placeholder="Example: Polusyon sa Lupa — Quiz 1" />
+              </div>
+              <div class="field">
+                <label>Pass Percentage</label>
+                <input type="number" name="pass_percent" value="70" min="0" max="100" />
+              </div>
+
+              <div class="field">
+                <label>Questions</label>
+                <p style="font-size:0.82rem; color:#6b7280; margin-bottom:0.5rem;">
+                  Add questions below. Each question needs a prompt, 2+ choices, and the correct answer.
+                </p>
+                <div id="quiz-questions"></div>
+                <button type="button" class="btn-secondary" id="add-question-btn" style="margin-top:0.5rem;">+ Add Question</button>
+              </div>
+
+              <button type="submit" class="btn" style="margin-top:1rem;">Save Quiz</button>
+              <p class="form-msg" id="quiz-msg"></p>
+            </form>
+          </div>
+        </section>
+
+        <!-- ==================== GLOSSARY PANEL ==================== -->
+        <section class="panel" id="panel-glossary">
+          <div class="panel-card">
+            <h2>Add Glossary Term</h2>
+            <p class="panel-sub">Terms appear in the Glossary page and are auto-linked in readings.</p>
+            <form id="glossary-form" class="admin-form">
+              <div class="field">
+                <label>Term</label>
+                <input type="text" name="term" required placeholder="Example: pollutants" />
+              </div>
+              <div class="field">
+                <label>Definition</label>
+                <textarea name="definition" rows="3" required placeholder="Definition in Filipino or English"></textarea>
+              </div>
+              <div class="field">
+                <label>Local Example (optional)</label>
+                <textarea name="local_example" rows="2" placeholder="Example: Ang Pasig River na dating itinuturing na patay na ilog..."></textarea>
+              </div>
+              <button type="submit" class="btn">Save Term</button>
+              <p class="form-msg" id="glossary-msg"></p>
+            </form>
+          </div>
+        </section>
+
       </div>
     </div>
   </div>
