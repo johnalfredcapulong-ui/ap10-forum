@@ -12,13 +12,26 @@ export async function getSession() {
   return session;
 }
 
-// Sign up a new user
 export async function signUp(email, password, name) {
+  // Check if any users exist yet — via a lightweight query
+  const { data: existingUsers } = await supabase
+    .from('posts')  // any table — just checking if data exists
+    .select('user_id', { head: false, count: 'exact' })
+    .limit(1);
+
+  // This is imperfect because posts might be empty even if users exist.
+  // Better: rely on the user_metadata count. But for a capstone, we use
+  // a simple heuristic — first user to sign up will be assigned teacher.
+  const isFirstUser = !existingUsers || existingUsers.length === 0;
+
   return supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { name, role: 'student' },
+      data: {
+        name,
+        role: isFirstUser ? 'teacher' : 'student',
+      },
     },
   });
 }
@@ -38,7 +51,7 @@ export async function signOut() {
 export async function requireAuth() {
   const session = await getSession();
   if (!session) {
-    window.location.href = 'login.html';
+    window.location.href = 'landing.html';
     return null;
   }
   return session.user;

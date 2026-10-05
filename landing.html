@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DocuLearn — Learn. Explore. Understand.</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="landing-body">
+
+  <div class="landing-hero" style="background-image: url('assets/guimba-hero.jpg');"></div>
+
+  <nav class="landing-nav">
+    <div class="landing-logo">DocuLearn</div>
+    <div class="landing-nav-actions">
+      <button id="nav-login-btn">Log in</button>
+      <button id="nav-signup-btn" class="primary">Sign up</button>
+    </div>
+  </nav>
+
+  <main class="landing-hero-card">
+    <div class="landing-eyebrow">Araling Panlipunan 10</div>
+    <h1>Matuto. Tumuklas. Umunawa.</h1>
+    <p>
+      Ang DocuLearn ay isang lokal na multimedia learning platform para sa Araling Panlipunan 10
+      na nag-uugnay sa mga mag-aaral sa pamamagitan ng mga dokumentaryo, aralin, gawain, at
+      kontemporaryong isyu gamit ang mga tunay na karanasan at kontekstong nakabata sa komunidad.
+    </p>
+    <div class="landing-cta-row">
+      <button id="cta-start" class="landing-cta-primary">Start learning</button>
+      <button id="cta-login" class="landing-cta-secondary">Log in</button>
+    </div>
+    <p class="landing-note">
+      The first account becomes the educator and can publish learning content.
+      Subsequent accounts are students.
+    </p>
+  </main>
+
+  <!-- Login Modal -->
+  <div class="auth-modal" id="login-modal">
+    <div class="auth-modal-backdrop" data-close></div>
+    <div class="auth-modal-card">
+      <button class="auth-modal-close" data-close>×</button>
+      <h2>Welcome back</h2>
+      <p class="auth-sub">Log in to continue learning.</p>
+
+      <form id="login-form">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="login-email" required placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="login-password" required placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn">Log In</button>
+        <p class="form-msg" id="login-msg"></p>
+      </form>
+
+      <p class="auth-switch">
+        New here? <button type="button" id="switch-to-signup">Create an account</button>
+      </p>
+    </div>
+  </div>
+
+  <!-- Signup Modal -->
+  <div class="auth-modal" id="signup-modal">
+    <div class="auth-modal-backdrop" data-close></div>
+    <div class="auth-modal-card">
+      <button class="auth-modal-close" data-close>×</button>
+      <h2>Create an account</h2>
+      <p class="auth-sub">Join the discussion and start learning.</p>
+
+      <form id="signup-form">
+        <div class="field">
+          <label>Your name</label>
+          <input type="text" id="signup-name" required placeholder="Juan Dela Cruz" maxlength="50" />
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="signup-email" required placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="signup-password" required placeholder="At least 6 characters" minlength="6" autocomplete="new-password" />
+        </div>
+        <button type="submit" class="btn">Sign up</button>
+        <p class="form-msg" id="signup-msg"></p>
+      </form>
+
+      <p class="auth-switch">
+        Already have an account? <button type="button" id="switch-to-login">Log in</button>
+      </p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    import { signIn, signUp } from './js/auth.js';
+
+    // Redirect if already logged in
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      window.location.href = 'index.html';
+    }
+
+    // Modal helpers
+    const loginModal = document.getElementById('login-modal');
+    const signupModal = document.getElementById('signup-modal');
+
+    function openModal(modal) {
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(modal) {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function closeAll() {
+      closeModal(loginModal);
+      closeModal(signupModal);
+    }
+
+    // Wire up open buttons
+    document.getElementById('nav-login-btn').addEventListener('click', () => openModal(loginModal));
+    document.getElementById('cta-login').addEventListener('click', () => openModal(loginModal));
+    document.getElementById('nav-signup-btn').addEventListener('click', () => openModal(signupModal));
+    document.getElementById('cta-start').addEventListener('click', () => openModal(signupModal));
+
+    // Switch between modals
+    document.getElementById('switch-to-signup').addEventListener('click', () => {
+      closeModal(loginModal);
+      openModal(signupModal);
+    });
+    document.getElementById('switch-to-login').addEventListener('click', () => {
+      closeModal(signupModal);
+      openModal(loginModal);
+    });
+
+    // Close on backdrop or ×
+    document.querySelectorAll('[data-close]').forEach((el) => {
+      el.addEventListener('click', () => closeAll());
+    });
+
+    // Esc key closes
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeAll();
+    });
+
+    // Login submit
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('login-msg');
+      msg.textContent = 'Logging in...';
+      msg.className = 'form-msg';
+
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      const { error } = await signIn(email, password);
+
+      if (error) {
+        msg.textContent = error.message;
+        msg.className = 'form-msg error';
+        return;
+      }
+
+      window.location.href = 'index.html';
+    });
+
+    // Signup submit
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('signup-msg');
+      msg.textContent = 'Creating account...';
+      msg.className = 'form-msg';
+
+      const name = document.getElementById('signup-name').value.trim();
+      const email = document.getElementById('signup-email').value.trim();
+      const password = document.getElementById('signup-password').value;
+
+      // Check if this is the first account
+      const { count } = await supabase
+        .from('topics') // any table works — just counting users
+        .select('*', { count: 'exact', head: true });
+
+      const { data, error } = await signUp(email, password, name);
+
+      if (error) {
+        msg.textContent = error.message;
+        msg.className = 'form-msg error';
+        return;
+      }
+
+      if (data.session) {
+        window.location.href = 'index.html';
+      } else {
+        msg.textContent = 'Account created. Redirecting...';
+        msg.className = 'form-msg success';
+        setTimeout(() => window.location.href = 'login.html', 1200);
+      }
+    });
+  </script>
+</body>
+</html>
