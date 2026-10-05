@@ -2042,3 +2042,55 @@ body {
   .welcome-card { padding: 1.75rem; }
   .welcome-card h2 { font-size: 1.35rem; }
 }
+
+/* ============================================================
+   Home bottom row (progress + quick links)
+   ============================================================ */
+.home-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1.25rem;
+  align-items: start;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 780px) {
+  .home-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Make modules grid denser on Home for full-width layout */
+.module-grid {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+/* Featured video should be wide, not tiny */
+#featured-video .video-card {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 0;
+  overflow: hidden;
+}
+
+#featured-video .video-thumb {
+  aspect-ratio: 16 / 9;
+}
+
+#featured-video .video-meta {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#featured-video .video-meta h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 780px) {
+  #featured-video .video-card {
+    grid-template-columns: 1fr;
+  }
+}

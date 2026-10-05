@@ -49,49 +49,45 @@
           </div>
         </div>
 
-        <!-- Two-column: modules + side rail -->
-        <div class="home-grid">
-          <div class="home-main">
-            <h2 class="section-title">Explore learning modules</h2>
-            <section id="modules" class="module-grid">
-              <p class="loading">Loading...</p>
-            </section>
+        <!-- Full-width modules -->
+        <h2 class="section-title" style="margin-top:2rem;">Explore learning modules</h2>
+        <section id="modules" class="module-grid">
+          <p class="loading">Loading...</p>
+        </section>
 
-            <!-- Featured documentary -->
-            <h2 class="section-title" style="margin-top:2.5rem;">Featured documentary</h2>
-            <div id="featured-video">
-              <p class="loading">Loading...</p>
+        <!-- Bottom row: progress + quick links -->
+        <div class="home-bottom-grid">
+          <div class="journey-card">
+            <h3>Your learning journey</h3>
+            <p class="journey-sub" id="journey-sub">Loading...</p>
+            <div class="module-progress journey-progress" id="journey-progress">
+              <div class="module-progress-bar">
+                <div class="module-progress-fill" style="width: 0%"></div>
+              </div>
+              <div class="module-progress-label">
+                <span id="journey-count">0 materials completed</span>
+                <span id="journey-percent">0%</span>
+              </div>
             </div>
+            <a href="my-progress.html" class="journey-cta">View My Progress →</a>
           </div>
 
-          <!-- Side rail -->
-          <aside class="home-side">
-            <div class="journey-card">
-              <h3>Your learning journey</h3>
-              <p class="journey-sub" id="journey-sub">Loading...</p>
-              <div class="module-progress journey-progress" id="journey-progress">
-                <div class="module-progress-bar">
-                  <div class="module-progress-fill" style="width: 0%"></div>
-                </div>
-                <div class="module-progress-label">
-                  <span id="journey-count">0 materials completed</span>
-                  <span id="journey-percent">0%</span>
-                </div>
-              </div>
-              <a href="my-progress.html" class="journey-cta">View My Progress →</a>
-            </div>
+          <div class="side-card" style="margin:0;">
+            <h3 class="side-card-title">Quick Links</h3>
+            <ul class="quick-links">
+              <li><a href="modules.html">Learning Modules</a></li>
+              <li><a href="documentaries.html">Documentaries</a></li>
+              <li><a href="glossary.html">Glossary</a></li>
+              <li><a href="discussion.html">Discussion Forum</a></li>
+              <li><a href="about.html">About DocuLearn</a></li>
+            </ul>
+          </div>
+        </div>
 
-            <div class="side-card">
-              <h3 class="side-card-title">Quick Links</h3>
-              <ul class="quick-links">
-                <li><a href="modules.html">Learning Modules</a></li>
-                <li><a href="documentaries.html">Documentaries</a></li>
-                <li><a href="glossary.html">Glossary</a></li>
-                <li><a href="discussion.html">Discussion Forum</a></li>
-                <li><a href="about.html">About DocuLearn</a></li>
-              </ul>
-            </div>
-          </aside>
+        <!-- Featured documentary full width -->
+        <h2 class="section-title" style="margin-top:2rem;">Featured documentary</h2>
+        <div id="featured-video">
+          <p class="loading">Loading...</p>
         </div>
       </div>
     </div>
@@ -121,7 +117,7 @@
         .select('*')
         .order('order_index', { ascending: true })
         .order('created_at', { ascending: true })
-        .limit(6);
+        .limit(8);
 
       if (error) {
         modulesEl.innerHTML = `<p class="error">Error: ${error.message}</p>`;
@@ -139,10 +135,10 @@
           return `
             <a class="module-card" href="topic.html?slug=${m.slug}">
               <div class="module-card-cover">
-                ${m.cover_url ? `<img src="${m.cover_url}" alt="${m.title}" loading="lazy" />` : ''}
+                ${m.cover_url ? `<img src="${m.cover_url}" alt="${escapeHtml(m.title)}" loading="lazy" />` : ''}
               </div>
               <div class="module-card-body">
-                ${m.category ? `<span class="module-card-tag">${m.category}</span>` : ''}
+                ${m.category ? `<span class="module-card-tag">${escapeHtml(m.category)}</span>` : ''}
                 <h3>${escapeHtml(m.title)}</h3>
                 <p>${escapeHtml(m.description || '')}</p>
                 <div class="module-progress">
@@ -166,7 +162,7 @@
 
     // ---------- Load featured documentary ----------
     async function loadFeatured() {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('materials')
         .select('*, topics(title, slug)')
         .eq('kind', 'documentary')
@@ -174,7 +170,6 @@
         .limit(1)
         .maybeSingle();
 
-      // Fallback: any documentary
       let material = data;
       if (!material) {
         const { data: fallback } = await supabase
@@ -188,7 +183,6 @@
       }
 
       if (!material) {
-        // Final fallback: latest cached YouTube video
         const { data: cached } = await supabase
           .from('yt_cache')
           .select('results')
@@ -223,39 +217,26 @@
 
       const videoId = material.youtube_id;
       const cover = material.url || '';
+      const thumb = cover || (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '');
+
+      featuredEl.innerHTML = `
+        <div class="video-card" ${videoId ? `data-video-id="${videoId}" data-title="${escapeHtml(material.title || '')}"` : ''}>
+          <div class="video-thumb">
+            ${thumb ? `<img src="${thumb}" alt="${escapeHtml(material.title || '')}" loading="lazy" />` : ''}
+            ${videoId ? `<div class="play-button">▶</div>` : ''}
+          </div>
+          <div class="video-meta">
+            <span class="video-tag">Documentary</span>
+            <h3>${escapeHtml(material.title || 'Documentary')}</h3>
+            <p>${escapeHtml(material.topics?.title || '')}${material.duration_minutes ? ` · ${material.duration_minutes} min` : ''}</p>
+          </div>
+        </div>
+      `;
 
       if (videoId) {
-        featuredEl.innerHTML = `
-          <div class="video-card" data-video-id="${videoId}" data-title="${escapeHtml(material.title || '')}">
-            <div class="video-thumb">
-              ${cover ? `<img src="${cover}" alt="${escapeHtml(material.title || '')}" loading="lazy" />` : `<img src="https://img.youtube.com/vi/${videoId}/maxresdefault.jpg" alt="" />`}
-              <div class="play-button">▶</div>
-            </div>
-            <div class="video-meta">
-              <span class="video-tag">Documentary</span>
-              <h3>${escapeHtml(material.title || 'Documentary')}</h3>
-              <p>${escapeHtml(material.topics?.title || '')}${material.duration_minutes ? ` · ${material.duration_minutes} min` : ''}</p>
-            </div>
-          </div>
-        `;
         featuredEl.querySelector('.video-card').addEventListener('click', () => {
           openVideoModal(videoId, material.title);
         });
-      } else if (cover) {
-        featuredEl.innerHTML = `
-          <div class="video-card">
-            <div class="video-thumb">
-              <img src="${cover}" alt="${escapeHtml(material.title || '')}" loading="lazy" />
-            </div>
-            <div class="video-meta">
-              <span class="video-tag">Documentary</span>
-              <h3>${escapeHtml(material.title || '')}</h3>
-              <p>${escapeHtml(material.topics?.title || '')}${material.duration_minutes ? ` · ${material.duration_minutes} min` : ''}</p>
-            </div>
-          </div>
-        `;
-      } else {
-        featuredEl.innerHTML = '<p class="empty">No documentaries yet.</p>';
       }
     }
 
