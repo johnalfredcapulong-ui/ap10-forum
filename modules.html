@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modules — DocuLearn</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar"></aside>
+    <div class="dashboard-main">
+      <div class="topbar"></div>
+      <div class="dashboard-content">
+        <h1 class="page-title">Modules</h1>
+        <p class="page-sub">Explore contextualized learning, one local story at a time.</p>
+
+        <div class="filter-row">
+          <input type="text" id="search" placeholder="Search titles, topics, or keywords..." />
+          <select id="filter-category">
+            <option value="">All topics</option>
+          </select>
+        </div>
+
+        <section id="modules" class="module-grid">
+          <p class="loading">Loading...</p>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initLayout } from './js/layout.js';
+    import { supabase } from './js/supabase.js';
+    import { getModuleProgress } from './js/progress.js';
+
+    const user = await initLayout('modules.html');
+    if (!user) throw new Error('Not logged in');
+
+    const modulesEl = document.getElementById('modules');
+    const searchEl = document.getElementById('search');
+    const categoryEl = document.getElementById('filter-category');
+
+    let allModules = [];
+
+    async function loadModules() {
+      const { data, error } = await supabase
+        .from('topics')
+        .select('*')
+        .order('order_index', { ascending: true })
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        modulesEl.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        return;
+      }
+
+      allModules = data || [];
+      renderModules(allModules);
+
+      // Populate category filter
+      const cats = [...new Set(allModules.map((m) => m.category).filter(Boolean))];
+      categoryEl.innerHTML = '<option value="">All topics</option>' +
+        cats.map((c) => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    async function renderModules(modules) {
+      if (!modules.length) {
+        modulesEl.innerHTML = '<p class="empty">No modules yet.</p>';
+        return;
+      }
+
+      modulesEl.innerHTML = await Promise.all(modules.map(async (m) => {
+        const progress = await getModuleProgress(m.id);
+        const cover = m.cover_url || '';
+        return `
+          <a class="module-card" href="topic.html?slug=${m.slug}">
+            <div class="module-card-cover">
+              ${cover ? `<img src="${cover}" alt="${m.title}" loading="lazy" />` : ''}
+            </div>
+            <div class="module-card-body">
+              ${m.category ? `<span class="module-card-tag">${m.category}</span>` : ''}
+              <h3>${m.title}</h3>
+              <p>${m.description || ''}</p>
+              <div class="module-progress">
+                <div class="module-progress-bar">
+                  <div class="module-progress-fill" style="width: ${progress.percent}%"></div>
+                </div>
+                <div class="module-progress-label">
+                  <span>${progress.completed} of ${progress.total} completed</span>
+                  <span>${progress.percent}%</span>
+                </div>
+              </div>
+              <span class="module-card-cta">Open module →</span>
+            </div>
+          </a>
+        `;
+      })).then((arr) => arr.join(''));
+    }
+
+    searchEl.addEventListener('input', () => {
+      const q = searchEl.value.toLowerCase().trim();
+      const cat = categoryEl.value;
+      const filtered = allModules.filter((m) => {
+        const matchesQ = !q ||
+          m.title.toLowerCase().includes(q) ||
+          (m.description || '').toLowerCase().includes(q);
+        const matchesCat = !cat || m.category === cat;
+        return matchesQ && matchesCat;
+      });
+      renderModules(filtered);
+    });
+
+    categoryEl.addEventListener('change', () => searchEl.dispatchEvent(new Event('input')));
+
+    loadModules();
+  </script>
+</body>
+</html>
