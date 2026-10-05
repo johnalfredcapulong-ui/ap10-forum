@@ -2,6 +2,7 @@ import { supabase } from './supabase.js';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 import { initLayout } from './layout.js';
 import { highlightTerms } from './glossary.js';
+import { markMaterialComplete } from './progress.js';
 
 const params = new URLSearchParams(window.location.search);
 const slug = params.get('slug');
@@ -19,6 +20,16 @@ async function init() {
   currentUser = await initLayout('lessons.html');
   if (!currentUser) return;
   loadTopic();
+}
+
+async function markModuleMaterialsComplete(moduleId, materials) {
+  for (const m of materials) {
+    try {
+      await markMaterialComplete(m.id, moduleId);
+    } catch (err) {
+      // Ignore — usually means it was already marked (unique constraint)
+    }
+  }
 }
 
 // ---------- Load topic ----------
@@ -139,6 +150,8 @@ async function loadMaterials() {
 
   materialsEl.innerHTML = html;
   highlightTerms(materialsEl);
+    // Mark all materials in this module as completed for the current user
+  markModuleMaterialsComplete(topic.id, data);
 }
 
 // ---------- Content formatter ----------

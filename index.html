@@ -14,100 +14,81 @@
       <div class="topbar"></div>
 
       <div class="dashboard-content">
+        <!-- Welcome hero -->
         <div class="welcome-card">
           <h2>Welcome to DocuLearn</h2>
-          <p>Explore local documentaries, lessons, and discussions about contemporary issues in Guimba.</p>
+          <p>Learn. Explore. Understand. Localized multimedia learning for Araling Panlipunan 10 — connecting you to real stories and real communities.</p>
           <div class="welcome-actions">
-            <a href="documentaries.html">Browse Documentaries</a>
-            <a href="lessons.html">View Lessons</a>
+            <a href="modules.html">Explore Modules</a>
+            <a href="documentaries.html">Watch Featured Documentary</a>
           </div>
         </div>
 
-        <div class="home-grid">
-          <!-- LEFT COLUMN: Modules + Activities + Quizzes -->
-          <div class="home-main">
-            <h2 class="page-title" style="font-size:1.2rem;">Modules</h2>
-            <p class="page-sub">Pick a topic to explore materials, documentaries, and discussion.</p>
+        <!-- What you can do -->
+        <h2 class="section-title">What you can do</h2>
+        <div class="capability-grid">
+          <div class="capability-card">
+            <div class="capability-icon">▶</div>
+            <h3>Watch</h3>
+            <p>Explore localized documentaries and real-world stories.</p>
+          </div>
+          <div class="capability-card">
+            <div class="capability-icon">▤</div>
+            <h3>Learn</h3>
+            <p>Study lessons, concepts, and contextualized learning materials.</p>
+          </div>
+          <div class="capability-card">
+            <div class="capability-icon">◌</div>
+            <h3>Discuss</h3>
+            <p>Share insights and reflect on contemporary issues.</p>
+          </div>
+          <div class="capability-card">
+            <div class="capability-icon">✓</div>
+            <h3>Assess</h3>
+            <p>Test your understanding through activities and assessments.</p>
+          </div>
+        </div>
 
-            <section id="topics" class="module-grid">
+        <!-- Two-column: modules + side rail -->
+        <div class="home-grid">
+          <div class="home-main">
+            <h2 class="section-title">Explore learning modules</h2>
+            <section id="modules" class="module-grid">
               <p class="loading">Loading...</p>
             </section>
 
-            <div class="mockup-section">
-              <h2 class="page-title" style="font-size:1.2rem;">Learning Activities</h2>
-              <p class="page-sub">Extra activities to deepen your understanding.</p>
-
-              <div class="activities-grid">
-                <a href="assessment.html" class="activity-card">
-                  <div class="activity-icon">&#9654;</div>
-                  <h3>One-Minute Video</h3>
-                  <p>Record your take on a current issue.</p>
-                  <span class="activity-status active">Active</span>
-                </a>
-
-                <a href="assessment.html" class="activity-card">
-                  <div class="activity-icon">&#9998;</div>
-                  <h3>Reflection Essay</h3>
-                  <p>Share your thoughts on current issues.</p>
-                  <span class="activity-status active">Active</span>
-                </a>
-
-                <div class="activity-card disabled">
-                  <div class="activity-icon">&#9707;</div>
-                  <h3>Create a Poster</h3>
-                  <p>Design an infographic on a module topic.</p>
-                  <span class="activity-status soon">Coming soon</span>
-                </div>
-
-                <div class="activity-card disabled">
-                  <div class="activity-icon">&#8596;</div>
-                  <h3>Think-Pair-Share</h3>
-                  <p>Discuss with a classmate.</p>
-                  <span class="activity-status soon">Coming soon</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="mockup-section">
-              <h2 class="page-title" style="font-size:1.2rem;">Quizzes</h2>
-              <p class="page-sub">Test your understanding of each module.</p>
-
-              <div class="quizzes-list">
-                <div class="quiz-item disabled">
-                  <div>
-                    <strong>Aralin 1: Mga Hamon at Kontemporanyong Isyu</strong>
-                    <p>10 items &middot; Multiple choice</p>
-                  </div>
-                  <span class="activity-status soon">Coming soon</span>
-                </div>
-                <div class="quiz-item disabled">
-                  <div>
-                    <strong>Aralin 2: Konteksto ng Suliraning Pangkapaligiran</strong>
-                    <p>10 items &middot; Multiple choice</p>
-                  </div>
-                  <span class="activity-status soon">Coming soon</span>
-                </div>
-              </div>
+            <!-- Featured documentary -->
+            <h2 class="section-title" style="margin-top:2.5rem;">Featured documentary</h2>
+            <div id="featured-video">
+              <p class="loading">Loading...</p>
             </div>
           </div>
 
-          <!-- RIGHT COLUMN: Featured + Quick Links -->
+          <!-- Side rail -->
           <aside class="home-side">
-            <div class="side-card">
-              <h3 class="side-card-title">Featured Documentary</h3>
-              <div id="featured-video">
-                <p class="loading">Loading...</p>
+            <div class="journey-card">
+              <h3>Your learning journey</h3>
+              <p class="journey-sub" id="journey-sub">Loading...</p>
+              <div class="module-progress journey-progress" id="journey-progress">
+                <div class="module-progress-bar">
+                  <div class="module-progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="module-progress-label">
+                  <span id="journey-count">0 materials completed</span>
+                  <span id="journey-percent">0%</span>
+                </div>
               </div>
+              <a href="my-progress.html" class="journey-cta">View My Progress →</a>
             </div>
 
             <div class="side-card">
               <h3 class="side-card-title">Quick Links</h3>
               <ul class="quick-links">
-                <li><a href="lessons.html">Learning Objectives</a></li>
+                <li><a href="modules.html">Learning Modules</a></li>
                 <li><a href="documentaries.html">Documentaries</a></li>
-                <li><a href="assessment.html">Discussion Forum</a></li>
-                <li><a href="my-progress.html">My Progress</a></li>
-                <li><a href="about.html">Help and Support</a></li>
+                <li><a href="glossary.html">Glossary</a></li>
+                <li><a href="discussion.html">Discussion Forum</a></li>
+                <li><a href="about.html">About DocuLearn</a></li>
               </ul>
             </div>
           </aside>
@@ -117,108 +98,220 @@
   </div>
 
   <script type="module">
-  import { initLayout } from './js/layout.js';
-  import { supabase } from './js/supabase.js';
+    import { initLayout } from './js/layout.js';
+    import { supabase } from './js/supabase.js';
+    import { getModuleProgress, getUserOverallProgress } from './js/progress.js';
 
-  await initLayout('index.html');
+    const user = await initLayout('index.html');
+    if (!user) throw new Error('Not logged in');
 
-  const topicsEl = document.getElementById('topics');
-  const featuredEl = document.getElementById('featured-video');
+    const modulesEl = document.getElementById('modules');
+    const featuredEl = document.getElementById('featured-video');
+    const journeySub = document.getElementById('journey-sub');
+    const journeyCount = document.getElementById('journey-count');
+    const journeyPercent = document.getElementById('journey-percent');
 
-  async function loadTopics() {
-    const { data, error } = await supabase
-      .from('topics')
-      .select('*')
-      .order('created_at', { ascending: true });
+    const firstName = (user.user_metadata.name || 'Student').split(' ')[0];
+    journeySub.textContent = `Welcome back, ${firstName}. Keep going — every material counts.`;
 
-    if (error) {
-      topicsEl.innerHTML = `<p class="error">Error: ${error.message}</p>`;
-      return;
-    }
+    // ---------- Load modules with progress ----------
+    async function loadModules() {
+      const { data, error } = await supabase
+        .from('topics')
+        .select('*')
+        .order('order_index', { ascending: true })
+        .order('created_at', { ascending: true })
+        .limit(6);
 
-    if (!data.length) {
-      topicsEl.innerHTML = '<p class="empty">No modules yet.</p>';
-      return;
-    }
-
-    topicsEl.innerHTML = data.map((t, i) => `
-      <a class="module-card" href="topic.html?slug=${t.slug}">
-        <span class="module-card-label">Module ${i + 1}</span>
-        <h3>${t.title}</h3>
-        <p>${t.description || ''}</p>
-        <span class="module-card-cta">Explore &rarr;</span>
-      </a>
-    `).join('');
-  }
-
-  async function loadFeaturedVideo() {
-    const { data, error } = await supabase
-      .from('yt_cache')
-      .select('results, created_at')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (error || !data || !data.results || !data.results.length) {
-      featuredEl.innerHTML = '<p class="empty">No documentary yet.</p>';
-      return;
-    }
-
-    const video = data.results[0];
-
-    featuredEl.innerHTML = `
-      <div class="video-card" data-video-id="${video.videoId}" data-title="${video.title.replace(/"/g, '&quot;')}">
-        <div class="video-thumb">
-          <img src="${video.thumbnail}" alt="${video.title}" loading="lazy" />
-          <div class="play-button">&#9654;</div>
-        </div>
-        <h3 style="font-size:0.95rem; padding: 0.75rem 1rem 0.25rem; color:#14532d; line-height:1.35;">${video.title}</h3>
-        <p style="font-size:0.82rem; color:#6b7280; padding: 0 1rem 0.85rem;">${video.channel}</p>
-      </div>
-    `;
-
-    featuredEl.querySelector('.video-card').addEventListener('click', () => {
-      openVideoModal(video.videoId, video.title);
-    });
-  }
-
-  function openVideoModal(videoId, title) {
-    const modal = document.createElement('div');
-    modal.className = 'video-modal';
-    modal.innerHTML = `
-      <div class="video-modal-backdrop"></div>
-      <div class="video-modal-content">
-        <button class="video-modal-close" aria-label="Close">&times;</button>
-        <div class="video-modal-player">
-          <iframe
-            src="https://www.youtube.com/embed/${videoId}?autoplay=1"
-            title="${title}"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-          ></iframe>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    document.body.style.overflow = 'hidden';
-
-    const close = () => {
-      modal.remove();
-      document.body.style.overflow = '';
-    };
-    modal.querySelector('.video-modal-close').addEventListener('click', close);
-    modal.querySelector('.video-modal-backdrop').addEventListener('click', close);
-    document.addEventListener('keydown', function esc(e) {
-      if (e.key === 'Escape') {
-        close();
-        document.removeEventListener('keydown', esc);
+      if (error) {
+        modulesEl.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        return;
       }
-    });
-  }
 
-  loadTopics();
-  loadFeaturedVideo();
-</script>
+      if (!data?.length) {
+        modulesEl.innerHTML = '<p class="empty">No modules yet.</p>';
+        return;
+      }
+
+      const cards = await Promise.all(
+        data.map(async (m) => {
+          const progress = await getModuleProgress(m.id);
+          return `
+            <a class="module-card" href="topic.html?slug=${m.slug}">
+              <div class="module-card-cover">
+                ${m.cover_url ? `<img src="${m.cover_url}" alt="${m.title}" loading="lazy" />` : ''}
+              </div>
+              <div class="module-card-body">
+                ${m.category ? `<span class="module-card-tag">${m.category}</span>` : ''}
+                <h3>${escapeHtml(m.title)}</h3>
+                <p>${escapeHtml(m.description || '')}</p>
+                <div class="module-progress">
+                  <div class="module-progress-bar">
+                    <div class="module-progress-fill" style="width: ${progress.percent}%"></div>
+                  </div>
+                  <div class="module-progress-label">
+                    <span>${progress.completed} / ${progress.total}</span>
+                    <span>${progress.percent}%</span>
+                  </div>
+                </div>
+                <span class="module-card-cta">Open module →</span>
+              </div>
+            </a>
+          `;
+        })
+      );
+
+      modulesEl.innerHTML = cards.join('');
+    }
+
+    // ---------- Load featured documentary ----------
+    async function loadFeatured() {
+      const { data, error } = await supabase
+        .from('materials')
+        .select('*, topics(title, slug)')
+        .eq('kind', 'documentary')
+        .eq('featured', true)
+        .limit(1)
+        .maybeSingle();
+
+      // Fallback: any documentary
+      let material = data;
+      if (!material) {
+        const { data: fallback } = await supabase
+          .from('materials')
+          .select('*, topics(title, slug)')
+          .eq('kind', 'documentary')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        material = fallback;
+      }
+
+      if (!material) {
+        // Final fallback: latest cached YouTube video
+        const { data: cached } = await supabase
+          .from('yt_cache')
+          .select('results')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        const vid = cached?.results?.[0];
+        if (!vid) {
+          featuredEl.innerHTML = '<p class="empty">No documentaries yet.</p>';
+          return;
+        }
+
+        featuredEl.innerHTML = `
+          <div class="video-card" data-video-id="${vid.videoId}" data-title="${escapeHtml(vid.title)}">
+            <div class="video-thumb">
+              <img src="${vid.thumbnail}" alt="${escapeHtml(vid.title)}" loading="lazy" />
+              <div class="play-button">▶</div>
+            </div>
+            <div class="video-meta">
+              <span class="video-tag">Documentary</span>
+              <h3>${escapeHtml(vid.title)}</h3>
+              <p>${escapeHtml(vid.channel)}</p>
+            </div>
+          </div>
+        `;
+        featuredEl.querySelector('.video-card').addEventListener('click', () => {
+          openVideoModal(vid.videoId, vid.title);
+        });
+        return;
+      }
+
+      const videoId = material.youtube_id;
+      const cover = material.url || '';
+
+      if (videoId) {
+        featuredEl.innerHTML = `
+          <div class="video-card" data-video-id="${videoId}" data-title="${escapeHtml(material.title || '')}">
+            <div class="video-thumb">
+              ${cover ? `<img src="${cover}" alt="${escapeHtml(material.title || '')}" loading="lazy" />` : `<img src="https://img.youtube.com/vi/${videoId}/maxresdefault.jpg" alt="" />`}
+              <div class="play-button">▶</div>
+            </div>
+            <div class="video-meta">
+              <span class="video-tag">Documentary</span>
+              <h3>${escapeHtml(material.title || 'Documentary')}</h3>
+              <p>${escapeHtml(material.topics?.title || '')}${material.duration_minutes ? ` · ${material.duration_minutes} min` : ''}</p>
+            </div>
+          </div>
+        `;
+        featuredEl.querySelector('.video-card').addEventListener('click', () => {
+          openVideoModal(videoId, material.title);
+        });
+      } else if (cover) {
+        featuredEl.innerHTML = `
+          <div class="video-card">
+            <div class="video-thumb">
+              <img src="${cover}" alt="${escapeHtml(material.title || '')}" loading="lazy" />
+            </div>
+            <div class="video-meta">
+              <span class="video-tag">Documentary</span>
+              <h3>${escapeHtml(material.title || '')}</h3>
+              <p>${escapeHtml(material.topics?.title || '')}${material.duration_minutes ? ` · ${material.duration_minutes} min` : ''}</p>
+            </div>
+          </div>
+        `;
+      } else {
+        featuredEl.innerHTML = '<p class="empty">No documentaries yet.</p>';
+      }
+    }
+
+    // ---------- Load overall progress ----------
+    async function loadJourney() {
+      const overall = await getUserOverallProgress();
+      journeyCount.textContent = `${overall.completed} of ${overall.total} materials completed`;
+      journeyPercent.textContent = `${overall.percent}%`;
+      const fill = document.querySelector('#journey-progress .module-progress-fill');
+      if (fill) fill.style.width = `${overall.percent}%`;
+    }
+
+    // ---------- Video modal ----------
+    function openVideoModal(videoId, title) {
+      const modal = document.createElement('div');
+      modal.className = 'video-modal';
+      modal.innerHTML = `
+        <div class="video-modal-backdrop"></div>
+        <div class="video-modal-content">
+          <button class="video-modal-close" aria-label="Close">×</button>
+          <div class="video-modal-player">
+            <iframe
+              src="https://www.youtube.com/embed/${videoId}?autoplay=1"
+              title="${escapeHtml(title)}"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      document.body.style.overflow = 'hidden';
+
+      const close = () => {
+        modal.remove();
+        document.body.style.overflow = '';
+      };
+      modal.querySelector('.video-modal-close').addEventListener('click', close);
+      modal.querySelector('.video-modal-backdrop').addEventListener('click', close);
+      document.addEventListener('keydown', function esc(e) {
+        if (e.key === 'Escape') {
+          close();
+          document.removeEventListener('keydown', esc);
+        }
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    // ---------- Init ----------
+    loadModules();
+    loadFeatured();
+    loadJourney();
+  </script>
 </body>
 </html>
