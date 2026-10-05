@@ -41,23 +41,20 @@ export async function signIn(email, password) {
   return supabase.auth.signInWithPassword({ email, password });
 }
 
-// Log out
 export async function signOut() {
   await supabase.auth.signOut();
-  window.location.href = 'login.html';
+  window.location.href = 'landing.html';  // was 'login.html'
 }
 
-// Redirect to login if not authenticated
 export async function requireAuth() {
   const session = await getSession();
   if (!session) {
-    window.location.href = 'landing.html';
+    window.location.href = 'landing.html';  // was 'login.html'
     return null;
   }
   return session.user;
 }
 
-// Redirect to home if already authenticated (for login/signup pages)
 export async function redirectIfAuthed() {
   const session = await getSession();
   if (session) {
