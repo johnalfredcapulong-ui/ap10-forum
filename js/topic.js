@@ -247,13 +247,16 @@ function renderVideos(videos) {
   }
 
   videosEl.innerHTML = videos.map((v) => `
-    <div class="video-card" data-video-id="${v.videoId}" data-title="${v.title.replace(/"/g, '&quot;')}">
+    <div class="video-card" data-video-id="${v.videoId}" data-title="${escapeHtml(v.title)}">
       <div class="video-thumb">
-        <img src="${v.thumbnail}" alt="${v.title}" loading="lazy" />
+        <img src="${v.thumbnail}" alt="${escapeHtml(v.title)}" loading="lazy" />
         <div class="play-button">▶</div>
       </div>
-      <h3>${v.title}</h3>
-      <p>${v.channel}</p>
+      <div class="video-meta">
+        <span class="video-tag">Documentary</span>
+        <h3>${escapeHtml(v.title)}</h3>
+        <p>${escapeHtml(v.channel || '')}</p>
+      </div>
     </div>
   `).join('');
 
