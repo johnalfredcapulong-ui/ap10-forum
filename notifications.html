@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications — DocuLearn</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar"></aside>
+
+    <div class="dashboard-main">
+      <div class="topbar"></div>
+
+      <div class="dashboard-content">
+        <h1 class="page-title">Notifications</h1>
+        <p class="page-sub">Updates from your discussions and assessments.</p>
+
+        <div id="notif-list">
+          <p class="loading">Loading...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initLayout } from './js/layout.js';
+    import { supabase } from './js/supabase.js';
+
+    const user = await initLayout('notifications.html');
+    if (!user) throw new Error('Not logged in');
+
+    const listEl = document.getElementById('notif-list');
+
+    async function loadNotifications() {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*, posts(content, topics(title, slug))')
+        .eq('recipient_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) {
+        listEl.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        return;
+      }
+
+      if (!data?.length) {
+        listEl.innerHTML = '<p class="empty">No notifications yet.</p>';
+        return;
+      }
+
+      listEl.innerHTML = data.map((n) => `
+        <div class="progress-row" style="cursor:pointer;" onclick="window.location.href='${n.posts?.topics?.slug ? `topic.html?slug=${n.posts.topics.slug}` : 'discussion.html'}'">
+          <div class="progress-row-header">
+            <div>
+              <h3 style="font-size:0.95rem;">${escapeHtml(n.message)}</h3>
+              <p style="font-size:0.85rem; color:#6b7280; margin-top:0.35rem;">
+                ${n.posts?.topics?.title ? escapeHtml(n.posts.topics.title) + ' · ' : ''}
+                ${formatDate(n.created_at)}
+              </p>
+            </div>
+            ${!n.is_read ? '<span class="activity-status active">New</span>' : ''}
+          </div>
+        </div>
+      `).join('');
+
+      // Mark all as read
+      await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('recipient_id', user.id)
+        .eq('is_read', false);
+    }
+
+    function formatDate(iso) {
+      const d = new Date(iso);
+      const diff = (new Date() - d) / 1000 / 60;
+      if (diff < 1) return 'Just now';
+      if (diff < 60) return `${Math.floor(diff)}m ago`;
+      if (diff < 1440) return `${Math.floor(diff / 60)}h ago`;
+      return d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    loadNotifications();
+  </script>
+</body>
+</html>

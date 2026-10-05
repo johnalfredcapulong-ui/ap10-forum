@@ -63,23 +63,35 @@
     }
 
     function renderDiscussions(posts) {
-      if (!posts.length) {
-        el.innerHTML = '<p class="empty">No discussions yet. Start one from any module.</p>';
-        return;
-      }
+        if (!posts.length) {
+          el.innerHTML = '<p class="empty">No discussions yet. Start one from any module.</p>';
+          return;
+        }
 
-      el.innerHTML = posts.map((p) => `
-        <a class="post" href="topic.html?slug=${p.topics?.slug || ''}" style="display:block; text-decoration:none; color:inherit;">
-          <div class="post-header">
-            <span class="badge">${(p.kind || 'question').toUpperCase()}</span>
-            <strong>${escapeHtml(p.name || 'Anonymous')}</strong>
-            <span class="date">${formatDate(p.created_at)}</span>
-          </div>
-          <h4>${escapeHtml(p.topics?.title || 'Untitled')}</h4>
-          <p>${escapeHtml((p.content || '').slice(0, 180))}${(p.content || '').length > 180 ? '...' : ''}</p>
-        </a>
-      `).join('');
-    }
+        el.innerHTML = posts.map((p) => {
+          const kind = (p.kind || 'question').toLowerCase();
+          const kindLabel = {
+            question: 'Question',
+            insight: 'Insight',
+            opinion: 'Opinion',
+            reflection: 'Reflection',
+            discussion: 'Discussion',
+          }[kind] || 'Discussion';
+
+          return `
+            <a class="post" href="topic.html?slug=${p.topics?.slug || ''}" style="display:block; text-decoration:none; color:inherit; margin-bottom:0.85rem;">
+              <div class="post-header">
+                <span class="badge">${kindLabel}</span>
+                <strong>${escapeHtml(p.name || 'Anonymous')}</strong>
+                <span class="date">${formatDate(p.created_at)}</span>
+              </div>
+              <h4>${escapeHtml(p.topics?.title || 'Untitled')}</h4>
+              <p>${escapeHtml((p.content || '').slice(0, 200))}${(p.content || '').length > 200 ? '...' : ''}</p>
+              <span class="progress-continue" style="margin-top:0.5rem; display:inline-block;">Open discussion (${p.reply_count || 0}) →</span>
+            </a>
+          `;
+        }).join('');
+      }
 
     function formatDate(iso) {
       return new Date(iso).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });

@@ -365,6 +365,7 @@ async function loadPosts() {
 }
 
 function attachPostHandlers() {
+  // ---------- Toggle reply form ----------
   postsEl.querySelectorAll('.reply-toggle').forEach((btn) => {
     btn.addEventListener('click', () => {
       const wrap = postsEl.querySelector(`[data-form-for="${btn.dataset.parent}"]`);
@@ -372,6 +373,7 @@ function attachPostHandlers() {
     });
   });
 
+  // ---------- Cancel reply ----------
   postsEl.querySelectorAll('.reply-cancel').forEach((btn) => {
     btn.addEventListener('click', () => {
       const wrap = btn.closest('.reply-form-wrap');
@@ -380,6 +382,7 @@ function attachPostHandlers() {
     });
   });
 
+  // ---------- Submit reply ----------
   postsEl.querySelectorAll('.reply-submit').forEach((btn) => {
     btn.addEventListener('click', async () => {
       if (!topic || !currentUser) return;
@@ -395,9 +398,12 @@ function attachPostHandlers() {
       btn.disabled = true;
       btn.textContent = 'Sending...';
 
+      const parentId = btn.dataset.parent;
+
+      // Insert the reply
       const { error } = await supabase.from('posts').insert({
         topic_id: topic.id,
-        parent_id: btn.dataset.parent,
+        parent_id: parentId,
         user_id: currentUser.id,
         name: currentUser.user_metadata.name || 'Anonymous',
         content,
@@ -411,6 +417,23 @@ function attachPostHandlers() {
         return;
       }
 
+      // ---------- Notify the parent post's author ----------
+      const { data: parentPost } = await supabase
+        .from('posts')
+        .select('user_id, name')
+        .eq('id', parentId)
+        .maybeSingle();
+
+      if (parentPost?.user_id && parentPost.user_id !== currentUser.id) {
+        await supabase.from('notifications').insert({
+          recipient_id: parentPost.user_id,
+          message: `${currentUser.user_metadata.name || 'Someone'} replied to your post.`,
+          kind: 'reply',
+          discussion_id: parentId,
+        });
+      }
+
+      // ---------- Reload the post list ----------
       loadPosts();
     });
   });
@@ -463,7 +486,8 @@ if (postForm) {
       user_id: currentUser.id,
       name: currentUser.user_metadata.name || 'Anonymous',
       content,
-      type,
+      type: type === 'reflection' ? 'reflection' : 'discussion',
+      kind: type,
       parent_id: null,
     });
 
