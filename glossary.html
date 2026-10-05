@@ -15,10 +15,10 @@
 
       <div class="dashboard-content">
         <h1 class="page-title">Glossary</h1>
-        <p class="page-sub">Mga mahirap na salita at ang kanilang kahulugan.</p>
+        <p class="page-sub">Key ideas, explained with local context.</p>
 
         <div class="search-bar" style="margin-bottom:1.5rem;">
-          <input type="text" id="search" placeholder="Search terms..." />
+          <input type="text" id="search" placeholder="Search a term or definition..." />
         </div>
 
         <div id="glossary-list">
@@ -53,7 +53,6 @@
       allTerms = data || [];
       renderTerms(allTerms);
 
-      // If URL has #term, scroll to it
       if (window.location.hash) {
         const target = document.querySelector(window.location.hash);
         if (target) {
@@ -72,28 +71,28 @@
         return;
       }
 
-      listEl.innerHTML = terms.map((t) => `
-        <div class="glossary-entry" id="term-${t.term.replace(/\s+/g, '-').toLowerCase()}">
-          <div class="glossary-entry-term">${escapeHtml(t.term)}</div>
-          <div class="glossary-entry-def">${escapeHtml(t.definition)}</div>
-        </div>
-      `).join('');
+      listEl.innerHTML = terms.map((t) => {
+        const slug = (t.slug || t.term.toLowerCase().replace(/\s+/g, '-'));
+        return `
+          <div class="glossary-entry" id="term-${slug}">
+            <div class="glossary-entry-term">${escapeHtml(t.term)}</div>
+            <div class="glossary-entry-def">${escapeHtml(t.definition)}</div>
+            ${t.local_example ? `<div class="glossary-entry-example">${escapeHtml(t.local_example)}</div>` : ''}
+          </div>
+        `;
+      }).join('');
     }
 
     function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
 
     searchEl.addEventListener('input', (e) => {
       const q = e.target.value.toLowerCase().trim();
       const filtered = allTerms.filter((t) =>
         t.term.toLowerCase().includes(q) ||
-        t.definition.toLowerCase().includes(q)
+        t.definition.toLowerCase().includes(q) ||
+        (t.local_example || '').toLowerCase().includes(q)
       );
       renderTerms(filtered);
     });
