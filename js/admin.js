@@ -289,6 +289,10 @@ function addQuestionBlock() {
       <label>Correct Answer</label>
       <input type="text" class="q-correct" placeholder="Must match one choice exactly" required />
     </div>
+    <div class="field">
+      <label>Rationalization (answer key explanation)</label>
+      <textarea class="q-rationalization" rows="3" placeholder="Ipaliwanag nang maikli kung bakit ito ang tamang sagot"></textarea>
+    </div>
   `;
 
   div.querySelector('.remove-question').addEventListener('click', () => div.remove());
@@ -320,7 +324,7 @@ quizForm.addEventListener('submit', async (e) => {
   const questionBlocks = quizQuestionsEl.querySelectorAll('.quiz-question-block');
   const questions = [];
 
- for (const block of questionBlocks) {
+  for (const block of questionBlocks) {
     const prompt = block.querySelector('.q-prompt').value.trim();
     const choicesRaw = block.querySelector('.q-choices').value.trim();
     const correct = block.querySelector('.q-correct').value.trim();
@@ -379,15 +383,15 @@ quizForm.addEventListener('submit', async (e) => {
   }
 
   // Insert questions
-    const questionRows = questions.map((q, i) => ({
-      material_id: material.id,
-      prompt: q.prompt,
-      kind: 'multiple_choice',
-      choices: q.choices,
-      correct_answer: q.correct,
-      rationalization: q.rationalization || null,
-      order_index: i + 1,
-    }));
+  const questionRows = questions.map((q, i) => ({
+    material_id: material.id,
+    prompt: q.prompt,
+    kind: 'multiple_choice',
+    choices: q.choices,
+    correct_answer: q.correct,
+    rationalization: q.rationalization || null,
+    order_index: i + 1,
+  }));
 
   const { error: qErr } = await supabase.from('questions').insert(questionRows);
 
