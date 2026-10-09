@@ -320,10 +320,11 @@ quizForm.addEventListener('submit', async (e) => {
   const questionBlocks = quizQuestionsEl.querySelectorAll('.quiz-question-block');
   const questions = [];
 
-  for (const block of questionBlocks) {
+ for (const block of questionBlocks) {
     const prompt = block.querySelector('.q-prompt').value.trim();
     const choicesRaw = block.querySelector('.q-choices').value.trim();
     const correct = block.querySelector('.q-correct').value.trim();
+    const rationalization = block.querySelector('.q-rationalization').value.trim();
 
     if (!prompt || !choicesRaw || !correct) {
       quizMsg.textContent = 'All questions need prompt, choices, and correct answer.';
@@ -345,7 +346,7 @@ quizForm.addEventListener('submit', async (e) => {
       return;
     }
 
-    questions.push({ prompt, choices, correct });
+    questions.push({ prompt, choices, correct, rationalization });
   }
 
   if (!questions.length) {
@@ -378,14 +379,15 @@ quizForm.addEventListener('submit', async (e) => {
   }
 
   // Insert questions
-  const questionRows = questions.map((q, i) => ({
-    material_id: material.id,
-    prompt: q.prompt,
-    kind: 'multiple_choice',
-    choices: q.choices,
-    correct_answer: q.correct,
-    order_index: i + 1,
-  }));
+    const questionRows = questions.map((q, i) => ({
+      material_id: material.id,
+      prompt: q.prompt,
+      kind: 'multiple_choice',
+      choices: q.choices,
+      correct_answer: q.correct,
+      rationalization: q.rationalization || null,
+      order_index: i + 1,
+    }));
 
   const { error: qErr } = await supabase.from('questions').insert(questionRows);
 

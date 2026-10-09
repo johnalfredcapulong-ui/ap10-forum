@@ -250,16 +250,16 @@
       // Auto-grade
       let score = 0;
       const answersPayload = questions.map((q, i) => {
-        const given = answers[i] || '';
-        const correct = (q.correct_answer || '').trim().toLowerCase();
-        const isCorrect = given.trim().toLowerCase() === correct;
-        if (isCorrect) score++;
-        return {
-          question_id: q.id,
-          response: given,
-          earned: isCorrect ? 1 : 0,
-        };
-      });
+      const given = (answers[i] || '').trim();
+      const correct = (q.correct_answer || '').trim().toLowerCase();
+      const isCorrect = given.toLowerCase() === correct;
+      if (isCorrect) score++;
+      return {
+        question_id: q.id,
+        response: given,
+        earned: isCorrect ? 1 : 0,
+      };
+    });
 
       const total = questions.length;
       const passPercent = 70;
@@ -315,6 +315,35 @@
             ${passed ? 'Passed' : 'Not passed'}
           </div>
         </div>
+
+        <div class="quiz-review">
+          <h3 style="font-size:1rem; margin-bottom:1rem;">Review your answers</h3>
+          ${questions.map((q, i) => {
+            const given = answersPayload[i].response;
+            const correct = (q.correct_answer || '').trim();
+            const isCorrect = given.toLowerCase() === correct.toLowerCase();
+            return `
+              <div class="quiz-review-item ${isCorrect ? 'correct' : 'wrong'}">
+                <div class="quiz-review-q">${escapeHtml(q.prompt)}</div>
+                <div class="quiz-review-line">
+                  <strong>Your answer:</strong>
+                  <span class="${isCorrect ? 'ok' : 'no'}">${escapeHtml(given || '(none)')}</span>
+                </div>
+                ${!isCorrect ? `
+                  <div class="quiz-review-line">
+                    <strong>Correct answer:</strong> <span class="ok">${escapeHtml(correct)}</span>
+                  </div>
+                ` : ''}
+                ${q.rationalization ? `
+                  <div class="quiz-review-rationale">
+                    <strong>Rationalization:</strong> ${escapeHtml(q.rationalization)}
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+
         <button class="btn" id="quiz-done-btn" style="margin-top:1.5rem;">Done</button>
       `;
 
