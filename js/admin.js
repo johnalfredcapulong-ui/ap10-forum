@@ -289,6 +289,10 @@ function addQuestionBlock() {
       <label>Correct Answer</label>
       <input type="text" class="q-correct" placeholder="Must match one choice exactly" required />
     </div>
+    <div class="field">
+      <label>Rationalization (answer key explanation)</label>
+      <textarea class="q-rationalization" rows="3" placeholder="Ipaliwanag nang maikli kung bakit ito ang tamang sagot"></textarea>
+    </div>
   `;
 
   div.querySelector('.remove-question').addEventListener('click', () => div.remove());
@@ -324,6 +328,7 @@ quizForm.addEventListener('submit', async (e) => {
     const prompt = block.querySelector('.q-prompt').value.trim();
     const choicesRaw = block.querySelector('.q-choices').value.trim();
     const correct = block.querySelector('.q-correct').value.trim();
+    const rationalization = block.querySelector('.q-rationalization').value.trim();
 
     if (!prompt || !choicesRaw || !correct) {
       quizMsg.textContent = 'All questions need prompt, choices, and correct answer.';
@@ -345,7 +350,7 @@ quizForm.addEventListener('submit', async (e) => {
       return;
     }
 
-    questions.push({ prompt, choices, correct });
+    questions.push({ prompt, choices, correct, rationalization });
   }
 
   if (!questions.length) {
@@ -384,6 +389,7 @@ quizForm.addEventListener('submit', async (e) => {
     kind: 'multiple_choice',
     choices: q.choices,
     correct_answer: q.correct,
+    rationalization: q.rationalization || null,
     order_index: i + 1,
   }));
 
